@@ -12,3 +12,6 @@ To Run Client in dev mode enter the follwoing command from the client directory
 ```
 npm run dev
 ```
+
+# Connecting to PG locally
+Review the development.env configuration and change to your own configuration requirements
