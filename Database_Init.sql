@@ -1,9 +1,9 @@
-CREATE TABLE Roles (
+CREATE TABLE IF NOT EXISTS Roles (
     id SERIAL PRIMARY KEY,
     name VARCHAR(50) UNIQUE NOT NULL
 );
 
-CREATE TABLE Users (
+CREATE TABLE IF NOT EXISTS  Users (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
@@ -11,13 +11,13 @@ CREATE TABLE Users (
     role_id INT REFERENCES Roles(id) ON DELETE CASCADE
 );
 
-CREATE TABLE Classrooms (
+CREATE TABLE IF NOT EXISTS  Classrooms (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     professor_id INT REFERENCES Users(id) ON DELETE CASCADE
 );
 
-CREATE TABLE ClassroomMembers (
+CREATE TABLE IF NOT EXISTS  ClassroomMembers (
     id SERIAL PRIMARY KEY,
     user_id INT REFERENCES Users(id) ON DELETE CASCADE,
     classroom_id INT REFERENCES Classrooms(id) ON DELETE CASCADE,
@@ -25,7 +25,7 @@ CREATE TABLE ClassroomMembers (
     UNIQUE(user_id, classroom_id)
 );
 
-CREATE TABLE Quizzes (
+CREATE TABLE IF NOT EXISTS  Quizzes (
     id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     classroom_id INT REFERENCES Classrooms(id) ON DELETE CASCADE,
@@ -35,12 +35,12 @@ CREATE TABLE Quizzes (
     due_date TIMESTAMP
 );
 
-CREATE TABLE QuestionTypes (
+CREATE TABLE IF NOT EXISTS  QuestionTypes (
     id SERIAL PRIMARY KEY,
     type_name VARCHAR(50) UNIQUE NOT NULL -- Matching, Multiple Choice, True/False
 );
 
-CREATE TABLE Questions (
+CREATE TABLE IF NOT EXISTS  Questions (
     id SERIAL PRIMARY KEY,
     quiz_id INT REFERENCES Quizzes(id) ON DELETE CASCADE,
     question_text TEXT NOT NULL, -- Will serialize for matching
@@ -49,7 +49,7 @@ CREATE TABLE Questions (
     correct_answer TEXT NOT NULL -- Stores the correct answer -- Serialize for matching
 );
 
-CREATE TABLE ClassQuestions (
+CREATE TABLE IF NOT EXISTS  ClassQuestions (
     id SERIAL PRIMARY KEY,
     classroom_id INT REFERENCES Classrooms(id) ON DELETE CASCADE,
     question_text TEXT NOT NULL,
@@ -60,7 +60,7 @@ CREATE TABLE ClassQuestions (
     expiry_time TIMESTAMP NOT NULL
 );
 
-CREATE TABLE Options (
+CREATE TABLE IF NOT EXISTS  Options (
     id SERIAL PRIMARY KEY,
     question_id INT REFERENCES Questions(id) ON DELETE CASCADE,
     class_question_id INT REFERENCES ClassQuestions(id) ON DELETE CASCADE,
@@ -72,7 +72,7 @@ CREATE TABLE Options (
     )
 );
 
-CREATE TABLE StudentAnswers (
+CREATE TABLE IF NOT EXISTS  StudentAnswers (
     id SERIAL PRIMARY KEY,
     student_id INT REFERENCES Users(id) ON DELETE CASCADE,
     question_id INT REFERENCES Questions(id) ON DELETE CASCADE,
@@ -87,7 +87,7 @@ CREATE TABLE StudentAnswers (
 );
 
 
-CREATE TABLE Grades (
+CREATE TABLE IF NOT EXISTS  Grades (
     id SERIAL PRIMARY KEY,
     student_id INT REFERENCES Users(id) ON DELETE CASCADE,
     quiz_id INT REFERENCES Quizzes(id) ON DELETE CASCADE,
