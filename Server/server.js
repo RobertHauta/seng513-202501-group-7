@@ -22,7 +22,8 @@ var currUser = "";
 (async () => {
     const client = await pool.connect();
     try {
-        const {rows} = await client.query('SELECT * FROM "playing_with_neon"')
+        //const {rows} = await client.query('SELECT * FROM "playing_with_neon"')
+        const {rows} = await client.query('SELECT * FROM "roles"')
         currUser = rows;//rows[0]["current_user"];
         console.log(currUser);
     } catch (error) {
