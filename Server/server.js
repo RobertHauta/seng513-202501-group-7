@@ -1,42 +1,31 @@
 const express = require('express');
 const cors = require('cors');
+const db = require('./queries.js');
 const app = express();
 const path = require('path');
+const { request } = require('http');
 require('dotenv').config({
     override: true,
     path: path.join(__dirname, 'Environments/neon_dev.env')
 });
-const {Pool, Client} = require('pg');
-
-// Database connection
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL
-    // user: process.env.USER,
-    // host: process.env.HOST,
-    // database: process.env.DATABASE,
-    // password: process.env.PASSWORD,
-    // port: process.env.PORT
-});
-var currUser = "";
-// Create a client
-(async () => {
-    const client = await pool.connect();
-    try {
-        //const {rows} = await client.query('SELECT * FROM "playing_with_neon"')
-        const {rows} = await client.query('SELECT * FROM "roles"')
-        currUser = rows;//rows[0]["current_user"];
-        console.log(currUser);
-    } catch (error) {
-        console.error('Error connecting to the database:', error);
-    } finally{
-        client.release();
-    }
-})();
 
 // Enable CORS for all routes
 app.use(cors());
+app.use(express.json());
 app.get('/api', (req, res) => {
-    res.json({ "users": currUser});
+    res.json({ "users": [{ "id": 1, "name": "John Doe" }, { "id": 2, "name": "Jane Doe" }] });
+});
+
+app.get('/api/login', (request, response) => {
+    db.default.getUserByNamePass(request, response);
+});
+
+app.post('/api/register', (request, response) => {
+    db.default.createNewUser(request, response);
+});
+
+app.delete('/api/users/:email',(request, response) => {
+    db.default.deleteUserByEmail(request, response);
 });
 
 app.listen(5000, () => {
