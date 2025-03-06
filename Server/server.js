@@ -17,15 +17,15 @@ app.get('/api', (req, res) => {
 });
 
 app.get('/api/login', (request, response) => {
-    db.default.getUserByNamePass(request, response);
+    db.default.users.getUserByNamePass(request, response);
 });
 
 app.post('/api/register', (request, response) => {
-    db.default.createNewUser(request, response);
+    db.default.users.createNewUser(request, response);
 });
 
 app.delete('/api/users/:email',(request, response) => {
-    db.default.deleteUserByEmail(request, response);
+    db.default.users.deleteUserByEmail(request, response);
 });
 
 app.listen(5000, () => {
