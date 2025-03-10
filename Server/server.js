@@ -24,7 +24,7 @@ app.post('/api/register', (request, response) => {
     db.default.users.createNewUser(request, response);
 });
 
-app.delete('/api/users/:email',(request, response) => {
+app.delete('/api/users',(request, response) => {
     db.default.users.deleteUserByEmail(request, response);
 });
 

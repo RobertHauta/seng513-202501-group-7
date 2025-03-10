@@ -13,7 +13,7 @@ curl -X GET http://localhost:5000/api/login ^
 
 # Delete User
 ```
-curl -X DELETE http://localhost:5000/api/users/:email ^
+curl -X DELETE http://localhost:5000/api/users ^
   -H "Content-Type: application/json" ^
   -d "{\"email\": \"robert@gmail.com\"}"
 ```
