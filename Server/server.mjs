@@ -1,10 +1,16 @@
-const express = require('express');
-const cors = require('cors');
-const db = require('./queries.js');
+import express from 'express';
+import cors from 'cors';
+import db from './queries.mjs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
-const path = require('path');
-const { request } = require('http');
-require('dotenv').config({
+
+dotenv.config({
     override: true,
     path: path.join(__dirname, 'Environments/neon_dev.env')
 });
