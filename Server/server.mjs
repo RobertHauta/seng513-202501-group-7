@@ -34,6 +34,29 @@ app.delete('/api/users',(request, response) => {
     db.default.users.deleteUserByEmail(request, response);
 });
 
+app.get('/api/verifyRole', (req, res) => {
+    db.default.users.verifyUserRole(req, res);
+});
+
+// Classroom endpoints
+app.post('/api/classrooms/create', (req, res) => {
+    db.default.classroom.createClassroom(req, res);
+});
+
+app.get('/api/classrooms', (req, res) => {
+    // This function should handle retrieving a user's classrooms.
+    db.default.classroom.getUserClassrooms(req, res);
+});
+
+app.post('/api/classrooms', (req, res) => {
+    // This function should handle adding a student to a class.
+    db.default.classroom.addStudentToClass(req, res);
+});
+
+app.post('/api/classrooms/question', (req, res) => {
+    db.default.classroomQuestions.createClassroomQuestion(req, res);
+});
+
 app.listen(5000, () => {
     console.log('Server listening at http://localhost:5000');
 });
