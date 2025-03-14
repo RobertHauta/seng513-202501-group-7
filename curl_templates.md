@@ -1,6 +1,6 @@
 # Creating New User
 ```
-curl -X POST http://localhost:5000/api/register -H "Content-Type: application/json" -d "{\"name\": \"RobertTeat\", \"email\": \"robert@gmail.com\", \"password\": \"Robbie123\", \"role_id\": 1}"
+curl -X POST http://localhost:5000/api/register -H "Content-Type: application/json" -d "{\"name\": \"RobertTest\", \"email\": \"robert@gmail.com\", \"password\": \"Robbie123\", \"role_id\": 1}"
 ```
 
 # Login
