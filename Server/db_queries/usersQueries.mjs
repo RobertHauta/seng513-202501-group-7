@@ -31,7 +31,7 @@ const getUserByNamePass = async (request, response) => {
     const hash = await sha256(password);
     try {
         const { rows } = await client.query(
-            `SELECT users.name AS user_name, roles.name AS role_name, users.password_hash AS password_hash
+            `SELECT users.name AS user_name, roles.name AS role_name, users.password_hash AS password_hash, users.id as user_id
              FROM users
              JOIN roles ON roles.id = users.role_id
              WHERE users.email = $1`,
@@ -120,8 +120,76 @@ const deleteUserByEmail = async (request, response) => {
     }
 }
 
-export default {
+// Function to retrieve classrooms for a given user ID (from query parameters)
+const getUserClassrooms = async (request, response) => {
+    const userId = request.query.userId; 
+  
+    if (!userId) {
+      response.status(400).json({ error: 'User ID is required' });
+      return;
+    }
+  
+    const client = await postgresPool.connect();
+    try {
+      const query = `
+        SELECT cm.role_id, c.name AS classroom_name
+        FROM classroommembers cm
+        JOIN classrooms c ON c.id = cm.classroom_id
+        WHERE cm.user_id = $1
+      `;
+      const { rows } = await client.query(query, [userId]);
+      response.json({ classrooms: rows });
+    } catch (error) {
+      console.error('Error fetching classrooms:', error);
+      response.status(500).json({ error: 'Internal server error' });
+    } finally {
+      client.release();
+    }
+};
+
+const verifyUserRole = async (req, res) => {
+    const { userId, expectedRoleId } = req.query; 
+  
+    if (!userId || !expectedRoleId) {
+      return res.status(400).json({ error: 'User ID and expected role ID are required' });
+    }
+  
+    const client = await postgresPool.connect();
+    try {
+      const query = `
+        SELECT role_id
+        FROM Users
+        WHERE id = $1
+      `;
+      const { rows } = await client.query(query, [userId]);
+  
+      if (rows.length === 0) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+  
+      const actualRoleId = rows[0].role_id;
+  
+      // Check if the actual role matches the expected role
+      if (parseInt(expectedRoleId, 10) === actualRoleId) {
+        return res.status(200).json({ valid: true, role: actualRoleId });
+      } else {
+        return res.status(403).json({ valid: false, role: actualRoleId, error: 'User does not have the expected role' });
+      }
+    } catch (error) {
+      console.error('Error verifying user role:', error);
+      return res.status(500).json({ error: 'Internal server error' });
+    } finally {
+      client.release();
+    }
+};
+
+const userQueries = {
     getUserByNamePass,
     createNewUser,
-    deleteUserByEmail
+    deleteUserByEmail,
+    getUserClassrooms,
+    verifyUserRole
 };
+
+export default userQueries;
+

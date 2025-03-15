@@ -20,14 +20,16 @@ function App() {
 
   return (
     <div className="App">
-      <h1>Fedora Learning</h1>
-      <form>
-        <label htmlFor="username">Username:</label>
-        <input type="text" id="username" name="username" required />
-        <label htmlFor="password">Password:</label>
-        <input type="password" id="password" name="password" required />
-        <button type="submit">Submit</button>
-      </form>
+      <h1>Users List</h1>
+      {loading ? (
+        <p>Loading...</p>
+      ) : (
+        <ul>
+          {users.map((user, index) => (
+            <li key={index}>id: {user.id} - name: {user.name}</li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
