@@ -84,9 +84,7 @@ const createClassroomQuestion = async (request, response) => {
     }
   };
 
-const classroomQuestionsQueries = {
+export default {
     createClassroomQuestion
 };
-
-export default classroomQuestionsQueries;
 
