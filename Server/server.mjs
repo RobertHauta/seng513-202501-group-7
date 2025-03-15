@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import db from './queries.mjs';
+import queries from './queries.mjs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
@@ -18,43 +18,45 @@ dotenv.config({
 // Enable CORS for all routes
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true })); // Parses URL-encoded data
+
 app.get('/api', (req, res) => {
     res.json({ "users": [{ "id": 1, "name": "John Doe" }, { "id": 2, "name": "Jane Doe" }] });
 });
 
 app.get('/api/login', (request, response) => {
-    db.default.users.getUserByNamePass(request, response);
+    queries.users.getUserByNamePass(request, response);
 });
 
 app.post('/api/register', (request, response) => {
-    db.default.users.createNewUser(request, response);
+    queries.users.createNewUser(request, response);
 });
 
 app.delete('/api/users',(request, response) => {
-    db.default.users.deleteUserByEmail(request, response);
+    queries.users.deleteUserByEmail(request, response);
 });
 
 app.get('/api/verifyRole', (req, res) => {
-    db.default.users.verifyUserRole(req, res);
+    queries.users.verifyUserRole(req, res);
 });
 
 // Classroom endpoints
 app.post('/api/classrooms/create', (req, res) => {
-    db.default.classroom.createClassroom(req, res);
+    queries.classes.createClassroom(req, res);
 });
 
 app.get('/api/classrooms', (req, res) => {
     // This function should handle retrieving a user's classrooms.
-    db.default.classroom.getUserClassrooms(req, res);
+    queries.classes.getUserClassrooms(req, res);
 });
 
-app.post('/api/classrooms', (req, res) => {
+app.post('/api/classrooms/add', (req, res) => {
     // This function should handle adding a student to a class.
-    db.default.classroom.addStudentToClass(req, res);
+    queries.classes.addStudentToClass(req, res);
 });
 
 app.post('/api/classrooms/question', (req, res) => {
-    db.default.classroomQuestions.createClassroomQuestion(req, res);
+    queries.classroomQuestions.createClassroomQuestion(req, res);
 });
 
 app.listen(5000, () => {

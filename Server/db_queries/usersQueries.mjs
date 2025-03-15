@@ -31,7 +31,7 @@ const getUserByNamePass = async (request, response) => {
     const hash = await sha256(password);
     try {
         const { rows } = await client.query(
-            `SELECT users.name AS user_name, roles.name AS role_name, users.password_hash AS password_hash
+            `SELECT users.name AS user_name, roles.name AS role_name, users.password_hash AS password_hash, users.id as user_id
              FROM users
              JOIN roles ON roles.id = users.role_id
              WHERE users.email = $1`,
@@ -133,8 +133,8 @@ const getUserClassrooms = async (request, response) => {
     try {
       const query = `
         SELECT cm.role_id, c.name AS classroom_name
-        FROM "classroommembers" cm
-        JOIN "classrooms" c ON c.id = cm.classroom_id
+        FROM classroommembers cm
+        JOIN classrooms c ON c.id = cm.classroom_id
         WHERE cm.user_id = $1
       `;
       const { rows } = await client.query(query, [userId]);
@@ -183,11 +183,13 @@ const verifyUserRole = async (req, res) => {
     }
 };
 
-export default {
+const userQueries = {
     getUserByNamePass,
     createNewUser,
     deleteUserByEmail,
     getUserClassrooms,
     verifyUserRole
 };
+
+export default userQueries;
 

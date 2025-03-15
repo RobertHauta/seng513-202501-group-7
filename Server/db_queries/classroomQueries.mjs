@@ -77,7 +77,7 @@ const addStudentToClass = async (request, response) => {
     const client = await postgresPool.connect();
     try {
       const query = `
-        INSERT INTO "classroommembers" (user_id, classroom_id, role_id)
+        INSERT INTO classroommembers (user_id, classroom_id, role_id)
         VALUES ($1, $2, $3)
         RETURNING *
       `;
@@ -92,8 +92,10 @@ const addStudentToClass = async (request, response) => {
 };
 
 
-export default {
+const classQueries = {
     createClassroom,
     addStudentToClass
 };
+
+export default classQueries;
 
