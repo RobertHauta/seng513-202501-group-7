@@ -1,7 +1,11 @@
-import * as usersQueries from './db_queries/usersQueries.mjs';
+import usersQueries from './db_queries/usersQueries.mjs';
+import classQueries from './db_queries/classroomQueries.mjs';
+import classroomQuestionQueries from './db_queries/classroomQuestionQueries';
 
 const queries = {
-    users: usersQueries.default
+    users: usersQueries,
+    classes: classQueries,
+    classroomQuestions: classroomQuestionQueries
 };
 
 export default queries;
