@@ -1,16 +1,28 @@
-h1{
-    text-align: center;
-    font-family: Georgia, 'Times New Roman', Times, serif;
-    font-size: 40px;
+.toolbar{
+    border-bottom:solid black;
+    display:flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.addcourse{
+    position:relative;
+    top:5px;
+    left: 10%;
+}
+
+.logout{
+    align-self:center;
+    position:relative;
+    right:2%;
 }
 
 .courseCard{
     width:80%;
-    background-color: gray;
+    background-color: lightgray;
 }
 
-
-
 p{
-    color:white
+    color:black;
 }

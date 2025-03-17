@@ -20,10 +20,12 @@ function HomePage(props) {
   */
   return (
     <div>
-        <h1>Welcome to Fedora Learning</h1>
-        <div className="container">
-            <button onClick={handleClick}>+</button>
-            <button onClick={props.onLogout}>Logout</button>
+        <div className='toolbar'>
+            <h1>My Courses</h1>
+            <button className='logout' onClick={props.onLogout}>Logout</button>
+        </div>
+        <div className="classescontainer">
+            <button className='addcourse' onClick={handleClick}>+</button>
             <div className="classes">
                 {classroom.map(course => (
                         <div className="courseCard" key={course.id}>
