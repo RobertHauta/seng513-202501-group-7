@@ -24,7 +24,7 @@ app.get('/api', (req, res) => {
     res.json({ "users": [{ "id": 1, "name": "John Doe" }, { "id": 2, "name": "Jane Doe" }] });
 });
 
-app.get('/api/login', (request, response) => {
+app.post('/api/login', (request, response) => {
     queries.users.getUserByNamePass(request, response);
 });
 
@@ -35,7 +35,7 @@ app.post('/api/register', (request, response) => {
 app.delete('/api/users',(request, response) => {
     queries.users.deleteUserByEmail(request, response);
 });
-
+  
 app.get('/api/verifyRole', (req, res) => {
     queries.users.verifyUserRole(req, res);
 });
