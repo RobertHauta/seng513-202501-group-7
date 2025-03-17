@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import './HomePage.css'
 
 function HomePage(props) {
   const [classroom, setClassroom] = useState([]);

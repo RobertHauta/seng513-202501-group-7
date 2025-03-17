@@ -1,8 +1,10 @@
+
 .container{
+    background-color: white;
     margin:auto;
     border-radius: 25px;
     border: 2px solid black;
-    size:50%;
+    width:50%;
     padding:20px;
 }
 
@@ -10,4 +12,14 @@ h1{
     text-align: center;
     font-family: Georgia, 'Times New Roman', Times, serif;
     font-size: 40px;
+}
+
+h2{
+    color: black;
+    text-align: center;
+}
+
+button{
+    background-color: black;
+    color:white;
 }
