@@ -35,9 +35,28 @@ app.post('/api/register', (request, response) => {
 app.delete('/api/users',(request, response) => {
     queries.users.deleteUserByEmail(request, response);
 });
+  
+app.get('/api/verifyRole', (req, res) => {
+    queries.users.verifyUserRole(req, res);
+});
 
-app.post('/api/classes/create', (request, response) => {
-    queries.classes.createClassroom(request, response);
+// Classroom endpoints
+app.post('/api/classrooms/create', (req, res) => {
+    queries.classes.createClassroom(req, res);
+});
+
+app.get('/api/classrooms', (req, res) => {
+    // This function should handle retrieving a user's classrooms.
+    queries.classes.getUserClassrooms(req, res);
+});
+
+app.post('/api/classrooms/add', (req, res) => {
+    // This function should handle adding a student to a class.
+    queries.classes.addStudentToClass(req, res);
+});
+
+app.post('/api/classrooms/question', (req, res) => {
+    queries.classroomQuestions.createClassroomQuestion(req, res);
 });
 
 app.listen(5000, () => {
