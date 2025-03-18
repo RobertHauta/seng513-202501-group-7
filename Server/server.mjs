@@ -10,15 +10,26 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-dotenv.config({
-    override: true,
-    path: path.join(__dirname, 'Environments/neon_dev.env')
-});
+try {
+    dotenv.config({
+        override: true,
+        path: path.join(__dirname, 'Environments/neon_dev.env')
+    });
+} catch (error) {
+    console.error('Error loading environment variables:', error);
+    process.exit(1);
+}
 
 // Enable CORS for all routes
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // Parses URL-encoded data
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send('Something broke!');
+});
 
 app.get('/api', (req, res) => {
     res.json({ "users": [{ "id": 1, "name": "John Doe" }, { "id": 2, "name": "Jane Doe" }] });
@@ -59,6 +70,7 @@ app.post('/api/classrooms/question', (req, res) => {
     queries.classroomQuestions.createClassroomQuestion(req, res);
 });
 
-app.listen(5000, () => {
-    console.log('Server listening at http://localhost:5000');
+app.listen(5100, () => {
+    console.log('Server listening at http://localhost:5100');
+
 });

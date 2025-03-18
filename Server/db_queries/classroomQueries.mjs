@@ -21,7 +21,7 @@ const postgresPool = new Pool({
 // Function to create a new Classroom
 const createClassroom = async (request, response) => {
     const { userId, name, role_id } = request.body;
-    
+    console.log('Creating classroom:', { userId, name, role_id });
     if (!userId) {
       response.status(400).json({ error: 'User ID is required' });
       return;

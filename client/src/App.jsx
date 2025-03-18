@@ -37,7 +37,7 @@ function App() {
 export default App;
 
 async function getUser(email, password) {
-  return new Promise((resolve, reject) => {fetch('http://localhost:5000/api/login', {
+  return new Promise((resolve, reject) => {fetch('http://localhost:5100/api/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -49,12 +49,15 @@ async function getUser(email, password) {
     })
     .then(response => {
       if(response.status === 401){
-        reject(1); // Invalid credentials
+        console.log('Invalid credentials');
+        reject(1);
       }
       
       if (!response.ok) {
-        reject(2); // Server error
+        console.error('Server error:', response.statusText);
+        reject(2);
       }
+      console.log('Login successful');
       return response.json();
     })
     .then(data => {
