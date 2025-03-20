@@ -23,3 +23,37 @@ function App() {
 }
 
 export default App;
+
+async function getUser(email, password) {
+  return new Promise((resolve, reject) => {fetch('http://localhost:5100/api/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        email: email,
+        password: password
+      })
+    })
+    .then(response => {
+      if(response.status === 401){
+        console.log('Invalid credentials');
+        reject(1);
+      }
+      
+      if (!response.ok) {
+        console.error('Server error:', response.statusText);
+        reject(2);
+      }
+      console.log('Login successful');
+      return response.json();
+    })
+    .then(data => {
+      resolve(data);
+    })
+    .catch(error => {
+      console.error('Error during login:', error);
+      reject(3);
+    });
+  });
+}
