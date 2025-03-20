@@ -13,12 +13,14 @@ function LoginForm(props) {
           <input type="text" id="email" name="email" required />
           <label htmlFor="password">Password:</label>
           <input type="password" id="password" name="password" required />
-          <Link to="/HomePage">
-            <button type="submit">Submit</button>
-          </Link>
-          <Link to="/RegisterPage">
-            <button type="submit">Register</button>
-          </Link>
+          <div>
+            <Link to="/HomePage">
+              <button type="submit">Submit</button>
+            </Link>
+            <Link to="/RegisterPage">
+              <button type="submit">Register</button>
+            </Link>
+          </div>
         </form>
       </div>
     </div>
