@@ -17,7 +17,7 @@ function LoginForm(props) {
             <Link to="/HomePage">
               <button type="submit">Submit</button>
             </Link>
-            <Link to="/RegisterPage">
+            <Link to="/RegisterForm">
               <button type="submit">Register</button>
             </Link>
           </div>
