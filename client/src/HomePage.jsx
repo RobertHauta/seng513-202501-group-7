@@ -29,10 +29,12 @@ function HomePage(props) {
             </Link>
             <div className="classes">
                 {classroom.map(course => (
+                      <Link to="/CoursePage">
                         <div className="courseCard" key={course.id}>
                             <h2>{course.name}</h2>
                             <p>Professor ID: {course.professor_id}</p>
                         </div>
+                      </Link>
                     ))
                 }
             </div>
