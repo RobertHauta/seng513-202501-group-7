@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+
 
 function HomePage(props) {
   const [classroom, setClassroom] = useState([]);
@@ -22,7 +24,9 @@ function HomePage(props) {
         <h1>Welcome to Fedora Learning</h1>
         <div className="container">
             <button onClick={handleClick}>+</button>
-            <button onClick={props.onLogout}>Logout</button>
+            <Link to="/">
+              <button>Logout</button>
+            </Link>
             <div className="classes">
                 {classroom.map(course => (
                         <div className="courseCard" key={course.id}>

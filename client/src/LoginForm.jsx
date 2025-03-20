@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+
 
 function LoginForm(props) {
+
   return (
     <div>
       <h1>Fedora Learning</h1>
@@ -10,7 +13,9 @@ function LoginForm(props) {
           <input type="text" id="email" name="email" required />
           <label htmlFor="password">Password:</label>
           <input type="password" id="password" name="password" required />
-          <button type="submit">Submit</button>
+          <Link to="/HomePage">
+            <button type="submit">Submit</button>
+          </Link>
         </form>
       </div>
     </div>

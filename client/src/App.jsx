@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import LoginForm from './LoginForm';
 import HomePage from './HomePage';
 
 function App() {
-  const [login, setLogin] = useState(false);
   const [user, setUser] = useState(null);
 
   async function handleSubmit(e){
@@ -13,23 +13,18 @@ function App() {
     let response = await getUser(enteredEmail, enteredPassword);
     if(!([1,2,3].includes(response))){
       console.log(response);
-      setLogin(true);
       setUser(response);
     }
   }
 
-  function handleLogout(){
-    setLogin(false);
-  }
-
   return (
     <div>
-      {login ? (
-        <HomePage onLogout={handleLogout} userData={user}/>
-      ) : (
-        <LoginForm onSubmit={handleSubmit} />
-      )
-      }
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<LoginForm onSubmit={handleSubmit} />} />
+          <Route path="/HomePage" element={<HomePage userData={user}/>} />
+        </Routes>
+      </BrowserRouter>
     </div>
   );
 }
