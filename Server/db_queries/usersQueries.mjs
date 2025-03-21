@@ -122,8 +122,9 @@ const deleteUserByEmail = async (request, response) => {
 
 // Function to retrieve classrooms for a given user ID (from query parameters)
 const getUserClassrooms = async (request, response) => {
-    const userId = request.query.userId; 
-  
+    const userId = request.params.userId; 
+    console.log(request.params);
+    console.log(`Getting classrooms for user ID: ${userId}`);
     if (!userId) {
       response.status(400).json({ error: 'User ID is required' });
       return;
@@ -132,12 +133,41 @@ const getUserClassrooms = async (request, response) => {
     const client = await postgresPool.connect();
     try {
       const query = `
-        SELECT cm.role_id, c.name AS classroom_name
+        SELECT cm.user_id, c.professor_id AS professor_id, c.name AS name
         FROM classroommembers cm
         JOIN classrooms c ON c.id = cm.classroom_id
         WHERE cm.user_id = $1
       `;
       const { rows } = await client.query(query, [userId]);
+      console.log('Retrieved classrooms:', rows);
+      response.json({ classrooms: rows });
+    } catch (error) {
+      console.error('Error fetching classrooms:', error);
+      response.status(500).json({ error: 'Internal server error' });
+    } finally {
+      client.release();
+    }
+};
+
+// Function to retrieve classrooms for a given user ID (from query parameters)
+const getProfessorClassrooms = async (request, response) => {
+    const userId = request.params.userId; 
+    console.log(request.params);
+    console.log(`Getting classrooms for user ID: ${userId}`);
+    if (!userId) {
+      response.status(400).json({ error: 'User ID is required' });
+      return;
+    }
+  
+    const client = await postgresPool.connect();
+    try {
+      const query = `
+        SELECT id, name, professor_id
+        FROM classrooms
+        WHERE professor_id = $1
+      `;
+      const { rows } = await client.query(query, [userId]);
+      console.log('Retrieved classrooms:', rows);
       response.json({ classrooms: rows });
     } catch (error) {
       console.error('Error fetching classrooms:', error);
@@ -188,7 +218,8 @@ const userQueries = {
     createNewUser,
     deleteUserByEmail,
     getUserClassrooms,
-    verifyUserRole
+    verifyUserRole,
+    getProfessorClassrooms
 };
 
 export default userQueries;

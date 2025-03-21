@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 
 function CoursePage() {
+  const navigate = useNavigate();
 
   return (
     <div>
       <h1>Welcome to Course</h1>
       <div className="container">
-          <Link to="/HomePage">
-            <button type="submit">Go back</button>
-          </Link>
+          <button type="button" onClick={() => navigate('/HomePage')}>Go back</button>
       </div>
     </div>
   );

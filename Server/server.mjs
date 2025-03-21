@@ -56,9 +56,14 @@ app.post('/api/classrooms/create', (req, res) => {
     queries.classes.createClassroom(req, res);
 });
 
-app.get('/api/classrooms', (req, res) => {
+app.get('/api/classrooms/:userId', (req, res) => {
     // This function should handle retrieving a user's classrooms.
-    queries.classes.getUserClassrooms(req, res);
+    queries.users.getUserClassrooms(req, res);
+});
+
+app.get('/api/classrooms/professors/:userId', (req, res) => {
+    // This function should handle retrieving a user's classrooms.
+    queries.users.getProfessorClassrooms(req, res);
 });
 
 app.post('/api/classrooms/add', (req, res) => {
@@ -68,7 +73,7 @@ app.post('/api/classrooms/add', (req, res) => {
 
 app.post('/api/classrooms/question', (req, res) => {
     queries.classroomQuestions.createClassroomQuestion(req, res);
-});
+}); 
 
 app.listen(5100, () => {
     console.log('Server listening at http://localhost:5100');

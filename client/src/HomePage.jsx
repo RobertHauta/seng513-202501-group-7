@@ -1,9 +1,19 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 
 function HomePage(props) {
   const [classroom, setClassroom] = useState([]);
+  const navigate = useNavigate();
+
+  useEffect(() => { //Run on load
+    const fetchClasses = async () => {
+      let response = props.userData.role_name === "Professor" ? await getProfessorClasses(props.userData.user_id) : await getStudentClasses(props.userData.user_id);
+      console.log(response);
+      setClassroom(() => [...response.classrooms]);
+    }
+    fetchClasses();
+  }, []);
 
   async function handleClick() {
     let data = props.userData;
@@ -23,18 +33,22 @@ function HomePage(props) {
     <div>
         <h1>Welcome to Fedora Learning</h1>
         <div className="container">
-            <button onClick={handleClick}>+</button>
-            <Link to="/">
-              <button>Logout</button>
-            </Link>
+            {props.userData.role_name === "Professor" ? (
+              <button onClick={handleClick}>+</button>
+            ) : (
+              <div>
+                <label htmlFor="course_id">Course ID: </label>
+                <input type="text" name="course_id" id="course_id"/>
+                <button>Enroll</button>
+              </div>
+            )}
+            <button onClick={() => navigate('/')}>Logout</button>
             <div className="classes">
                 {classroom.map(course => (
-                      <Link to="/CoursePage">
-                        <div className="courseCard" key={course.id}>
+                        <div className="courseCard" key={course.id} onClick={() => navigate('/CoursePage')}>
                             <h2>{course.name}</h2>
                             <p>Professor ID: {course.professor_id}</p>
                         </div>
-                      </Link>
                     ))
                 }
             </div>
@@ -44,6 +58,55 @@ function HomePage(props) {
 }
 
 export default HomePage;
+
+
+async function getStudentClasses(userId) {
+  return new Promise((resolve, reject) => {
+    fetch(`http://localhost:5100/api/classrooms/${userId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Server error');
+      }
+      return response.json();
+    })
+    .then(data => {
+      resolve(data);
+    })
+    .catch(error => {
+      console.error('Error during class retrieval:', error);
+      reject(error);
+    });
+  });
+}
+
+async function getProfessorClasses(userId) {
+  return new Promise((resolve, reject) => {
+    fetch(`http://localhost:5100/api/classrooms/professors/${userId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Server error');
+      }
+      return response.json();
+    })
+    .then(data => {
+      resolve(data);
+    })
+    .catch(error => {
+      console.error('Error during class retrieval:', error);
+      reject(error);
+    });
+  });
+}
 
 async function createNewClass(data){
   return new Promise((resolve, reject) => {
