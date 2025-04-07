@@ -70,7 +70,7 @@ const createQuiz = async (req, res) => {
 };
 
 // Function to get quizzes
-const getQuizzesForStudent = async (req, res) => {
+const getQuizzes = async (req, res) => {
     // Retrieve classroomId from the URL parameters
     const { classroomId } = req.params;
     if (!classroomId) {
@@ -95,7 +95,7 @@ const getQuizzesForStudent = async (req, res) => {
 };
 
 //Function to create a question for a quiz
-const createQuestion = async (req, res) => {
+const createQuizQuestion = async (req, res) => {
   const { 
     quiz_id, 
     question_text, 
@@ -133,10 +133,35 @@ const createQuestion = async (req, res) => {
   }
 };
 
+const getQuestionsForQuiz = async (req, res) => {
+  const { quizId } = req.params;
+  if (!quizId) {
+    return res.status(400).json({ error: 'Quiz ID is required' });
+  }
+  
+  const client = await postgresPool.connect();
+  try {
+    const queryText = `
+      SELECT *
+      FROM Questions
+      WHERE quiz_id = $1
+    `;
+    const { rows } = await client.query(queryText, [quizId]);
+    return res.status(200).json({ questions: rows });
+  } catch (error) {
+    console.error('Error fetching questions for quiz:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    client.release();
+  }
+};
+
+
 const quizQueries = {
-    getQuizzesForStudent,
+    getQuizzes,
     createQuiz,
-    createQuestion
+    createQuizQuestion,
+    getQuestionsForQuiz
 };
 
 export default quizQueries;
