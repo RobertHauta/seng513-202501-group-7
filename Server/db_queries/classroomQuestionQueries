@@ -84,7 +84,33 @@ const createClassroomQuestion = async (request, response) => {
     }
   };
 
+
+// Function to retrieve classroom questions for a given classroom
+const getClassroomQuestions = async (req, res) => {
+  const { classroomId } = req.params;
+  if (!classroomId) {
+    return res.status(400).json({ error: 'Classroom ID is required' });
+  }
+
+  const client = await postgresPool.connect();
+  try {
+    const query = `
+      SELECT *
+      FROM ClassQuestions
+      WHERE classroom_id = $1
+    `;
+    const { rows } = await client.query(query, [classroomId]);
+    return res.status(200).json({ questions: rows });
+  } catch (error) {
+    console.error('Error retrieving classroom questions:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    client.release();
+  }
+};
+
 export default {
-    createClassroomQuestion
+    createClassroomQuestion,
+    getClassroomQuestions
 };
 

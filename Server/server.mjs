@@ -40,6 +40,11 @@ app.get('/api/verifyRole', (req, res) => {
     queries.users.verifyUserRole(req, res);
 });
 
+
+
+
+
+
 // Classroom endpoints
 app.post('/api/classrooms/create', (req, res) => {
     queries.classes.createClassroom(req, res);
@@ -55,8 +60,49 @@ app.post('/api/classrooms/add', (req, res) => {
     queries.classes.addStudentToClass(req, res);
 });
 
+
+
+
+
+
+// ClassroomQuestions endpoints
 app.post('/api/classrooms/question', (req, res) => {
     queries.classroomQuestions.createClassroomQuestion(req, res);
+});
+app.get('/api/classrooms/question/:classroomId', (req, res) => {
+    // Retrieves classroomQuestions and all it takes is a classroomId. Gets every column of the ClassroomQuestions table.This is for displaying on classroom home page. 
+    // For classroom question details when pressing a specific classroom question from home page, use (Insert API here)
+    // (#TODO there is no check for who is calling this as right now we can't track if a student has finished 
+    // a classroom Question or not so I am just retrieving the classroom Questions)
+    queries.classroomQuestions.getClassroomQuestions(req, res);
+});
+
+
+
+
+
+//Quiz endpoints
+app.post('/api/quizzes/create', (req, res) => {
+    //BEFORE CALLING THIS, IN THE MIDDLEWARE, MAKE SURE TO CALL verifyUserRole aka '/api/verifyRole' to verify the professor is the one creating a quiz
+    //Creates a quiz, not the questions for the quiz so call this before calling this api: /api/quizzes/question/create
+    //Needs: title, classroom_id, created_by, total_weight, release_date, due_date as params
+    queries.quiz.createQuiz(req, res);
+});
+
+
+app.post('/api/quizzes/question/create', (req, res) => {
+    //Creates a question for a quiz, doesn't work for class questions since that is in a different table. Check if professor is the one calling with /api/verifyRole first
+    //Needs: quiz_id, question_text, type_id, marks, correct_answer 
+    queries.quiz.createQuestion(req, res);
+});
+
+app.get('/api/quiz/:classroomId', (req, res) => { 
+    // Retrieves quizzes and all it takes is a classroomId. Gets every column of the quizzes table. This is for displaying on classroom home page. 
+    // For quiz details when pressing a specific quiz from home page, use (Insert API here)
+
+    // (#TODO there is no check for who is calling this as right now we can't track if a student has finished a specific quiz
+    // or not so I am just retrieving the quizzes)
+    queries.quiz.getQuizzesForStudent(req, res);
 });
 
 app.listen(5000, () => {
