@@ -1,12 +1,24 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 
 function CoursePage() {
   const [quizzes, setQuizzes] = useState([]);
   const [questions, setQuestions] = useState([]);
   const [grades, setGrades] = useState([]);
+
+  useEffect(() => { //Run on load
+      const fetchQuizzes = async () => {
+        let response_quiz = await getQuizzes(location.state.id);
+        setQuizzes(() => [...response_quiz.quizzes]);
+
+        let response_questions = await getClassQuestions(location.state.id);
+        setQuestions(() => [...response_questions.questions]);
+
+        //TO DO: Fetch grades and update grades state
+      }
+      fetchQuizzes();
+    }, []);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -15,13 +27,16 @@ function CoursePage() {
     <div>
       <h1>{location.state.name}</h1>
       <div className="container">
-          <button type="button" onClick={() => navigate('/HomePage')}>Return to Home Page</button>
-          <button onClick={() => navigate('/')}>Logout</button>
+          <div style={{display: 'flex'}}>
+            <button type="button" onClick={() => navigate('/HomePage')}>Return to Home Page</button>
+            <button type="button" style={{marginRight: 'auto'}} onClick={() => navigate('/ClassList', {state: {name: location.state.name, id: location.state.id, user: location.state.user}})}>View Class List</button>
+            <button onClick={() => navigate('/')}>Logout</button>
+          </div>
           
           <div className="gridContainer">
             <div className='container' style={{gridRow: 'span 2', backgroundColor: '#5e5e5e'}}>
               {location.state.user.role_name === "Professor" ? (
-                <div style={{display: 'inline'}}>
+                <div style={{display: 'flex', alignItems: 'center'}}>
                   <h2>Quizzes</h2>
                   <button>+</button>
                 </div>
@@ -30,9 +45,9 @@ function CoursePage() {
               )}
               <div className="quizzes">
                 {quizzes.map(quiz => (
-                        <div className="card" key={quiz.id} onClick={() => navigate('/QuizPage')}>
-                            <h3>{quiz.name}</h3>
-                            <p>Due: {quiz.date}</p>
+                        <div style={{display: 'flex'}} key={quiz.id}>
+                            <h3 className="container" style={{marginRight: '1em', backgroundColor: "#939393"}} onClick={() => navigate('/QuizPage')}>{quiz.title}</h3>
+                            <p className="container" style={{backgroundColor: '#1a1a1a'}}>Due: {quiz.due_date.substring(0, 10)}</p>
                         </div>
                     ))
                 }
@@ -40,6 +55,13 @@ function CoursePage() {
             </div>
 
             <div className='container' style={{backgroundColor: '#5e5e5e'}}>
+              <div className='card' style={{backgroundColor: '#1a1a1a', width: 'fit-content', height: 'fit-content'}}>
+                {location.state.user.role_name === "Student" ? (
+                  <p>Total Grade: {}</p>
+                ) : (
+                  <p>Average Course Grade: {}</p>
+                )}
+              </div>
               <h2>Grades</h2>
               <table>
                 <thead>
@@ -59,18 +81,13 @@ function CoursePage() {
                   )}
                 </thead>
                 <tbody>
-                  <tr>
-                    <td>ayo</td>
-                    <td>we</td>
-                    <td>ballin</td>
-                  </tr>
                 </tbody>
               </table>
             </div>
 
             <div className='container' style={{backgroundColor: '#5e5e5e'}}>
               {location.state.user.role_name === "Professor" ? (
-                <div style={{display: 'inline'}}>
+                <div style={{display: 'flex', alignItems: 'center'}}>
                   <h2>Class Questions</h2>
                   <button>+</button>
                 </div>
@@ -79,8 +96,8 @@ function CoursePage() {
               )}
               <div className="questions">
                 {questions.map(question => (
-                        <div className="card" key={question.id} onClick={() => navigate('/QuestionPage')}>
-                            <h3>{question.name}</h3>
+                        <div className="container" style={{backgroundColor: "#939393"}} key={question.id} onClick={() => navigate('/QuestionPage')}>
+                            <h3>{question.Name}</h3>
                         </div>
                     ))
                 }
@@ -94,6 +111,52 @@ function CoursePage() {
 
 export default CoursePage;
 
-function getQuizzes(cour){
+function getQuizzes(course_id){
+  return new Promise((resolve, reject) => {
+    fetch(`http://localhost:5100/api/quiz/${course_id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => {
+      if (!response.ok) {
+        reject(1);
+        throw new Error('Server error');
+      }
+      return response.json();
+    })
+    .then(data => {
+      resolve(data);
+    })
+    .catch(error => {
+      console.error('Error during class retrieval:', error);
+      reject(2);
+    });
+  });
+}
 
+function getClassQuestions(course_id){
+  return new Promise((resolve, reject) => {
+    fetch(`http://localhost:5100/api/classrooms/question/${course_id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => {
+      if (!response.ok) {
+        reject(1);
+        throw new Error('Server error');
+      }
+      return response.json();
+    })
+    .then(data => {
+      resolve(data);
+    })
+    .catch(error => {
+      console.error('Error during class retrieval:', error);
+      reject(2);
+    });
+  });
 }

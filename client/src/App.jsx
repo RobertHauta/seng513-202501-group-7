@@ -4,6 +4,7 @@ import LoginForm from './LoginForm';
 import RegisterForm from './RegisterForm';
 import HomePage from './HomePage';
 import CoursePage from './CoursePage';
+import ClassList from './ClassList';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -16,6 +17,7 @@ function App() {
           <Route path="/RegisterForm" element={<RegisterForm />} />
           <Route path="/HomePage" element={<HomePage userData={user}/>} />
           <Route path="/CoursePage" element={<CoursePage />} />
+          <Route path="/ClassList" element={<ClassList />} />
         </Routes>
       </BrowserRouter>
     </div>

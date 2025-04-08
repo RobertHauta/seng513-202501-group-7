@@ -84,7 +84,66 @@ const createClassroomQuestion = async (request, response) => {
     }
   };
 
-export default {
-    createClassroomQuestion
+
+// Function to retrieve classroom questions for a given classroom
+const getClassroomQuestions = async (req, res) => {
+  const { classroomId } = req.params;
+  if (!classroomId) {
+    return res.status(400).json({ error: 'Classroom ID is required' });
+  }
+
+  const client = await postgresPool.connect();
+  try {
+    const query = `
+      SELECT *
+      FROM ClassQuestions
+      WHERE classroom_id = $1
+    `;
+    const { rows } = await client.query(query, [classroomId]);
+    return res.status(200).json({ questions: rows });
+  } catch (error) {
+    console.error('Error retrieving classroom questions:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    client.release();
+  }
 };
 
+const getUnfinishedClassQuestionsForStudent = async (req, res) => {
+  const { classroomId, studentId } = req.params;
+
+  if (!classroomId) {
+    return res.status(400).json({ error: 'Classroom ID is required' });
+  }
+  if (!studentId) {
+    return res.status(400).json({ error: 'Student ID is required' });
+  }
+
+  const client = await postgresPool.connect();
+  try {
+    const query = `
+      SELECT cq.*
+      FROM ClassQuestions cq
+      WHERE cq.classroom_id = $1
+        AND NOT EXISTS (
+          SELECT 1
+          FROM StudentAnswers sa
+          WHERE sa.class_question_id = cq.id
+            AND sa.student_id = $2
+        )
+    `;
+    const { rows } = await client.query(query, [classroomId, studentId]);
+    return res.status(200).json({ classQuestions: rows });
+  } catch (error) {
+    console.error('Error fetching unfinished class questions:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    client.release();
+  }
+};
+
+export default {
+    createClassroomQuestion,
+    getClassroomQuestions,
+    getUnfinishedClassQuestionsForStudent
+};

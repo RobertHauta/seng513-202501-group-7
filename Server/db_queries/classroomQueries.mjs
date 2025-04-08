@@ -95,7 +95,7 @@ const addStudentToClass = async (request, response) => {
           i.user_id AS user_id,  
           c.professor_id AS professor_id,  
           c.name AS name, 
-          c.classroom_id AS id, 
+          c.id AS id, 
           u.name AS professor_name
         FROM 
           inserted i
@@ -115,10 +115,44 @@ const addStudentToClass = async (request, response) => {
     }
 };
 
+const getAllStudentsInClassroom = async (request, response) => {
+  const { classroomId } = request.params;
+  console.log('Getting students in classroom:', classroomId);
+  if (!classroomId) {
+    response.status(400).json({ error: 'Classroom id is required' });
+    return;
+  }
+  const client = await postgresPool.connect();
+  try{
+    const query = `
+      SELECT
+        cm.user_id AS id,
+        u.name AS name,
+        u.email AS email,
+        cm.role_id AS role_id
+      FROM
+        classroommembers cm
+      JOIN
+        users u ON u.id = cm.user_id
+      WHERE
+        cm.classroom_id = $1
+    `;
+    const { rows } = await client.query(query, [classroomId]);
+    response.json({ students: rows });
+  }
+  catch (error) {
+    console.error('Error fetching classroom students:', error);
+    response.status(500).json({ error: 'Internal server error' });
+  } finally {
+    client.release();
+  }
+};
+
 
 const classQueries = {
     createClassroom,
-    addStudentToClass
+    addStudentToClass,
+    getAllStudentsInClassroom
 };
 
 export default classQueries;

@@ -43,6 +43,8 @@ button {
   background-color: #1a1a1a;
   cursor: pointer;
   transition: border-color 0.25s;
+  margin: 0 10px;
+  height: fit-content;
 }
 button:hover {
   border-color: #646cff;
@@ -158,8 +160,5 @@ th {
 
 tr:nth-child(even) {
   background-color: #f9f9f9;
-}
-
-tr:hover {
-  background-color: #ddd;
+  color: black;
 }

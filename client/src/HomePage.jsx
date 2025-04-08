@@ -50,15 +50,19 @@ function HomePage(props) {
       <h1>Welcome to Fedora Learning</h1>
       <div className="container">
         {props.userData.role_name === "Professor" ? (
-          <button onClick={makeCourse}>Create Course</button>
+          <div style={{display: 'flex'}}>
+            <button style={{marginRight: 'auto'}} onClick={makeCourse}>Create Course</button>
+            <button onClick={() => navigate('/')}>Logout</button>
+          </div>
         ) : (
-          <div>
+          <div style={{display: 'flex'}}>
             <label htmlFor="course_id">Course ID: </label>
             <input type="text" name="course_id" id="course_id"/>
-            <button onClick={makeEnrollment}>Enroll</button>
+            <button style={{marginRight: 'auto'}} onClick={makeEnrollment}>Enroll</button>
+            <button onClick={() => navigate('/')}>Logout</button>
           </div>
         )}
-        <button onClick={() => navigate('/')}>Logout</button>
+        
         <div className="classes">
           {classroom.map(course => (
             <div className="card" key={course.id} onClick={() => navigate('/CoursePage', {state: {name: course.name, id: course.id, user: props.userData}})}>
