@@ -94,6 +94,42 @@ const getQuizzes = async (req, res) => {
     }
 };
 
+//Retrieves unfinished quizzes for a student based on classroomid and studentId
+const getUnfinishedQuizzesForStudent = async (req, res) => {
+  const { classroomId, studentId } = req.params;
+
+  if (!classroomId || !studentId) {
+    return res.status(400).json({ error: 'Classroom ID and student ID are required' });
+  }
+
+  const client = await postgresPool.connect();
+  try {
+    const query = `
+      SELECT q.*
+      FROM Quizzes q
+      WHERE q.classroom_id = $1
+        AND EXISTS (
+          SELECT 1
+          FROM Questions qt
+          WHERE qt.quiz_id = q.id
+            AND NOT EXISTS (
+              SELECT 1
+              FROM StudentAnswers sa
+              WHERE sa.question_id = qt.id
+                AND sa.student_id = $2
+            )
+        )
+    `;
+    const { rows } = await client.query(query, [classroomId, studentId]);
+    return res.status(200).json({ quizzes: rows });
+  } catch (error) {
+    console.error('Error fetching unfinished quizzes:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    client.release();
+  }
+};
+
 //Function to create a question for a quiz
 const createQuizQuestion = async (req, res) => {
   const { 
@@ -159,6 +195,7 @@ const getQuestionsForQuiz = async (req, res) => {
 
 const quizQueries = {
     getQuizzes,
+    getUnfinishedQuizzesForStudent,
     createQuiz,
     createQuizQuestion,
     getQuestionsForQuiz

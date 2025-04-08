@@ -101,14 +101,18 @@ app.post('/api/quiz/question/create', (req, res) => {
 });
 
 app.get('/api/quiz/:classroomId', (req, res) => { 
-    // This is for displaying on classroom home page. 
+    // This is for getting all quizzes for a classroom (doesn't show unfinished quizzes)
     // Retrieves * from quizzes
     // Pass In: classroomId
     // For quiz details when pressing a specific quiz from home page, use '/api/quiz/questions/:quizId'
-
-    // (#TODO there is no check for who is calling this as right now we can't track if a student has finished a specific quiz
-    // or not so I am just retrieving the quizzes)
     queries.quiz.getQuizzes(req, res);
+});
+
+app.get('/api/quizzes/unfinished/:classroomId/:studentId', (req, res) => {
+    //This is for displaying on classroom home page for a student. 
+    //Pass In: classroomId, studentId
+    //Gets all the quizzes for that classroom that have questions that the student has not finished
+    queries.quiz.getUnfinishedQuizzesForStudent(req, res);
 });
 
 app.get('/api/quiz/questions/:quizId', (req, res) => {
