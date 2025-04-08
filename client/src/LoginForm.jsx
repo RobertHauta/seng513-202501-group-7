@@ -11,7 +11,7 @@ function LoginForm(props) {
     const enteredPassword = e.target.password.value;
     let response = await getUser(enteredEmail, enteredPassword);
     if(!([1,2,3].includes(response))){
-      console.log(response);
+      localStorage.setItem('userData', JSON.stringify(response));
       props.setUser(response);
       navigate('/HomePage');
     }
@@ -35,6 +35,8 @@ function LoginForm(props) {
     </div>
   );
 }
+
+export default LoginForm;
 
 async function getUser(email, password) {
   return new Promise((resolve, reject) => {fetch('http://localhost:5100/api/login', {
@@ -69,6 +71,4 @@ async function getUser(email, password) {
     });
   });
 }
-
-export default LoginForm;
 

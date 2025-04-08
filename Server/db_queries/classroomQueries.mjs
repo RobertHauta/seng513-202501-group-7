@@ -43,9 +43,18 @@ const createClassroom = async (request, response) => {
     const client = await postgresPool.connect();
     try {
       const query = `
-        INSERT INTO Classrooms (name, professor_id)
-        VALUES ($1, $2)
-        RETURNING *
+         WITH inserted AS ( 
+          INSERT INTO Classrooms (name, professor_id)
+          VALUES ($1, $2)
+          RETURNING professor_id, id, name
+        )
+        SELECT
+          i.professor_id AS professor_id,  
+          i.id AS id,  
+          i.name AS name,
+          u.name AS professor_name
+        FROM inserted i
+        JOIN users u ON u.id = i.professor_id
       `;
       const { rows } = await client.query(query, [name, userId]);
       response.json({ classroom: rows[0] });
@@ -77,11 +86,26 @@ const addStudentToClass = async (request, response) => {
     const client = await postgresPool.connect();
     try {
       const query = `
-        INSERT INTO classroommembers (user_id, classroom_id, role_id)
-        VALUES ($1, $2, $3)
-        RETURNING *
+        WITH inserted AS (
+          INSERT INTO classroommembers (user_id, classroom_id, role_id)
+          VALUES ($1, $2, $3)
+          RETURNING user_id, classroom_id
+        )
+        SELECT 
+          i.user_id AS user_id,  
+          c.professor_id AS professor_id,  
+          c.name AS name, 
+          c.classroom_id AS id, 
+          u.name AS professor_name
+        FROM 
+          inserted i
+        JOIN 
+          classrooms c ON c.id = i.classroom_id
+        JOIN 
+          users u ON u.id = c.professor_id
       `;
       const { rows } = await client.query(query, [userId, classroom_id, role_id]);
+      console.log(rows);
       response.json({ membership: rows[0] });
     } catch (error) {
       console.error('Error inserting classroom membership:', error);

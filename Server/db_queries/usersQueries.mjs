@@ -133,9 +133,10 @@ const getUserClassrooms = async (request, response) => {
     const client = await postgresPool.connect();
     try {
       const query = `
-        SELECT cm.user_id, c.professor_id AS professor_id, c.name AS name
+        SELECT cm.user_id, c.professor_id AS professor_id, c.name AS name, u.name AS professor_name
         FROM classroommembers cm
         JOIN classrooms c ON c.id = cm.classroom_id
+        JOIN users u ON u.id = c.professor_id
         WHERE cm.user_id = $1
       `;
       const { rows } = await client.query(query, [userId]);
@@ -162,8 +163,9 @@ const getProfessorClassrooms = async (request, response) => {
     const client = await postgresPool.connect();
     try {
       const query = `
-        SELECT id, name, professor_id
+        SELECT classrooms.id AS id, classrooms.name AS name, professor_id, u.name AS professor_name
         FROM classrooms
+        JOIN users u ON u.id = classrooms.professor_id
         WHERE professor_id = $1
       `;
       const { rows } = await client.query(query, [userId]);
