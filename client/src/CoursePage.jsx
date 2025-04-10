@@ -57,9 +57,9 @@ function CoursePage() {
             <div className='container' style={{backgroundColor: '#5e5e5e'}}>
               <div className='card' style={{backgroundColor: '#1a1a1a', width: 'fit-content', height: 'fit-content'}}>
                 {location.state.user.role_name === "Student" ? (
-                  <p>Total Grade: {}</p>
+                  <p style={{margin: '0'}}>Total Grade: {}</p>
                 ) : (
-                  <p>Average Course Grade: {}</p>
+                  <p style={{margin: '0'}}>Average Course Grade: {}</p>
                 )}
               </div>
               <h2>Grades</h2>
@@ -96,7 +96,7 @@ function CoursePage() {
               )}
               <div className="questions">
                 {questions.map(question => (
-                        <div className="container" style={{backgroundColor: "#939393"}} key={question.id} onClick={() => navigate('/QuestionPage')}>
+                        <div className="card" style={{backgroundColor: "#939393"}} key={question.id} onClick={() => navigate('/QuestionPage')}>
                             <h3>{question.Name}</h3>
                         </div>
                     ))
