@@ -11,13 +11,14 @@ function CoursePage() {
       const fetchQuizzes = async () => {
         let response_quiz = await getQuizzes(location.state.id);
         setQuizzes(() => [...response_quiz.quizzes]);
-
-        let response_questions = await getClassQuestions(location.state.id);
-        setQuestions(() => [...response_questions.questions]);
-
         //TO DO: Fetch grades and update grades state
       }
+      const fetchQuestions = async () => {
+        let response_questions = await getClassQuestions(location.state.id);
+        setQuestions(() => [...response_questions.questions]);
+      }
       fetchQuizzes();
+      fetchQuestions();
     }, []);
 
   const navigate = useNavigate();
