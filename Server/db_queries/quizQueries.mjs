@@ -19,54 +19,62 @@ const postgresPool = new Pool({
 });
 
 const createQuiz = async (req, res) => {
-    const { title,
-      classroom_id,
-      created_by,
-      total_weight,
-      release_date,
-      due_date 
-    } = req.body;
-  
-    if (!title) {
-      return res.status(400).json({ error: 'Title is required' });
-    }
-    if (!classroom_id) {
-      return res.status(400).json({ error: 'classroom_id is required' });
-    }
-    if (!created_by) {
-      return res.status(400).json({ error: 'created_by is required' });
-    }
-    if (!due_date) {
-      return res.status(400).json({ error: 'due_date is required' });
-    }
-  
-    // Use total_weight or default to 0.0
-    const effectiveTotalWeight = total_weight ?? 0.0;
-    // Use release_date or default to current date/time in ISO format
-    const effectiveReleaseDate = release_date || new Date().toISOString();
-  
-    const client = await postgresPool.connect();
-    try {
-      const query = `
-        INSERT INTO Quizzes (title, classroom_id, created_by, total_weight, release_date, due_date)
-        VALUES ($1, $2, $3, $4, $5, $6)
-        RETURNING *
+  const { title, classroom_id, created_by, total_weight, release_date, due_date, questions } = req.body;
+
+  const client = await postgresPool.connect();
+  try {
+    // Start a transaction
+    await client.query('BEGIN');
+
+    // Insert the quiz
+    const quizQuery = `
+      INSERT INTO Quizzes (title, classroom_id, created_by, total_weight, release_date, due_date)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING id
+    `;
+    const quizResult = await client.query(quizQuery, [title, classroom_id, created_by, total_weight, release_date, due_date]);
+    const quizId = quizResult.rows[0].id;
+
+    // Insert questions and options
+    for (const question of questions) {
+      // Insert question
+      const questionQuery = `
+        INSERT INTO Questions (quiz_id, question_text, type_id, marks, correct_answer)
+        VALUES ($1, $2, $3, $4, $5)
+        RETURNING id
       `;
-      const { rows } = await client.query(query, [
-        title,
-        classroom_id,
-        created_by,
-        effectiveTotalWeight,
-        effectiveReleaseDate,
-        due_date
+      const questionResult = await client.query(questionQuery, [
+        quizId,
+        question.question_text,
+        question.type_id,
+        question.marks,
+        question.correct_answer
       ]);
-      return res.status(201).json({ quiz: rows[0] });
-    } catch (error) {
-      console.error('Error creating quiz:', error);
-      return res.status(500).json({ error: 'Internal server error' });
-    } finally {
-      client.release();
+      const questionId = questionResult.rows[0].id;
+
+      // Insert options if they exist
+      if (question.options && question.options.length > 0) {
+        const optionQuery = `
+          INSERT INTO Options (question_id, option_text, is_correct)
+          VALUES ($1, $2, $3)
+        `;
+        for (const option of question.options) {
+          await client.query(optionQuery, [questionId, option.option_text, option.is_correct]);
+        }
+      }
     }
+
+    // Commit the transaction
+    await client.query('COMMIT');
+
+    res.json({ message: 'Quiz created successfully', quizId });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error creating quiz:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    client.release();
+  }
 };
 
 // Function to get quizzes

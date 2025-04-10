@@ -65,7 +65,7 @@ function HomePage(props) {
         
         <div className="classes">
           {classroom.map(course => (
-            <div className="card" key={course.id} onClick={() => navigate('/CoursePage', {state: {name: course.name, id: course.id, user: props.userData}})}>
+            <div className="card" style={{cursor: "pointer"}} key={course.id} onClick={() => navigate('/CoursePage', {state: {name: course.name, id: course.id, user: props.userData}})}>
               <h2>{course.name}</h2>
               <p>Professor Name: {course.professor_name}</p>
               <p>Course ID: {course.id}</p>

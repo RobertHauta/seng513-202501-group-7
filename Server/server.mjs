@@ -97,6 +97,13 @@ app.get('/api/classquestions/unfinished/:classroomId/:studentId', (req, res) => 
     queries.classroomQuestions.getUnfinishedClassQuestionsForStudent(req, res);
 });
 
+app.get('/api/classquestions/options/:questionId', (req, res) => {
+    //This is for getting all options for a specific question
+    // Retrieves * from options
+    // Pass in: questionId
+    queries.classroomQuestions.getQuestionOptions(req, res);
+});
+
 
 
 

@@ -39,7 +39,7 @@ function CoursePage() {
               {location.state.user.role_name === "Professor" ? (
                 <div style={{display: 'flex', alignItems: 'center'}}>
                   <h2>Quizzes</h2>
-                  <button>+</button>
+                  <button onClick={() => navigate('/MakeAssignment', {state: {type: "quiz", name: location.state.name, id: location.state.id, user: location.state.user}})}>+</button>
                 </div>
               ) : (
                 <h2>Quizzes</h2>
@@ -47,7 +47,7 @@ function CoursePage() {
               <div className="quizzes">
                 {quizzes.map(quiz => (
                         <div style={{display: 'flex'}} key={quiz.id}>
-                            <h3 className="container" style={{marginRight: '1em', backgroundColor: "#939393"}} onClick={() => navigate('/QuizPage')}>{quiz.title}</h3>
+                            <h3 className="container" style={{marginRight: '1em', backgroundColor: "#939393", cursor: "pointer"}} onClick={() => navigate('/QuizPage' , {state: {quizObject: quiz, name: location.state.name, id: location.state.id, user: location.state.user}})}>{quiz.title}</h3>
                             <p className="container" style={{backgroundColor: '#1a1a1a'}}>Due: {quiz.due_date.substring(0, 10)}</p>
                         </div>
                     ))
@@ -90,15 +90,16 @@ function CoursePage() {
               {location.state.user.role_name === "Professor" ? (
                 <div style={{display: 'flex', alignItems: 'center'}}>
                   <h2>Class Questions</h2>
-                  <button>+</button>
+                  <button onClick={() => navigate('/MakeAssignment', {state: {type: "question", name: location.state.name, id: location.state.id, user: location.state.user}})}>+</button>
                 </div>
               ) : (
                 <h2>Class Questions</h2>
               )}
-              <div className="questions">
+              <div className="classes">
                 {questions.map(question => (
-                        <div className="card" style={{backgroundColor: "#939393"}} key={question.id} onClick={() => navigate('/QuestionPage')}>
-                            <h3>{question.Name}</h3>
+                        <div className="card" style={{backgroundColor: "#939393", cursor: "pointer"}} key={question.id} onClick={() => navigate('/QuestionPage', {state: {classQuestion: question, name: location.state.name, id: location.state.id, user: location.state.user}})}>
+                            <h3>{question.name}</h3>
+                            <p>{question.posted_at.substring(0, 10)}</p>
                         </div>
                     ))
                 }
