@@ -43,6 +43,8 @@ button {
   background-color: #1a1a1a;
   cursor: pointer;
   transition: border-color 0.25s;
+  margin: 0 10px;
+  height: fit-content;
 }
 button:hover {
   border-color: #646cff;
@@ -90,11 +92,73 @@ input{
   flex-wrap: wrap;
 }
 
-.courseCard{
+.card{
   width: 15%; 
   height: 15%;
-  background-color: #535bf2;
+  background-color: #5e5e5e;
   margin: 10px;
   padding: 10px;
   border-radius: 0.375rem;
+  cursor: pointer;
+}
+
+.gridContainer{
+  margin-top: 1em;
+  display: grid;
+  gap: 1em;
+  grid-template-columns: 1fr 3fr;
+  grid-template-rows: 1fr 1fr;
+}
+
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.popup-content {
+  background-color: rgb(85, 85, 85);
+  padding: 20px;
+  border-radius: 5px;
+  width: 300px;
+  z-index: 1001;
+}
+
+body.popup-active {
+  overflow: hidden;
+}
+
+.blur-background {
+  filter: blur(5px);
+  pointer-events: none;
+  user-select: none;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: left;
+}
+
+th {
+  color: black;
+  background-color: #f4f4f4;
+  font-weight: bold;
+}
+
+tr:nth-child(even) {
+  background-color: #f9f9f9;
+  color: black;
 }
