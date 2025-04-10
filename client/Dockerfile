@@ -1,5 +1,5 @@
 # Build stage
-FROM node:14 as build
+FROM node:18 as build
 
 # Set the working directory in the container
 WORKDIR /usr/src/app
@@ -23,7 +23,7 @@ FROM nginx:stable-alpine
 COPY --from=build /usr/src/app/dist /usr/share/nginx/html
 
 # Expose port 80
-EXPOSE 5173
+EXPOSE 80
 
 # Start Nginx server
 CMD ["nginx", "-g", "daemon off;"]
