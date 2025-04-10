@@ -1,0 +1,19 @@
+version: '3.8'
+services:
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:3000"  # Expose port 3000 inside the container as 5173 on the host
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./Server
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5100:5100"
+    environment:
+      NODE_ENV: development
