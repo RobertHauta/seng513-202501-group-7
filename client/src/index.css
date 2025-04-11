@@ -170,3 +170,33 @@ tr:nth-child(even) {
   background-color: #f9f9f9;
   color: black;
 }
+
+@media (max-width: 768px){
+  .gridContainer{
+    display: flex;
+    flex-direction: column;
+  }
+
+  h1{
+    text-align: center;
+  }
+
+  .classes{
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card{
+    width:auto;
+    height:auto;
+  }
+
+  th,td{
+    font-size: x-small;
+  }
+
+  button{
+    height:auto;
+  }
+
+}
