@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
+const apiURL = import.meta.env.VITE_SERVER_URL;
+
 function Question(props){
     const [options, setOptions] = useState([]);
 
@@ -58,7 +60,7 @@ async function getOptionsQuestion(id){
     return new Promise((resolve, reject) => {
         console.log(id);
 
-        fetch(`http://localhost:5100/api/classquestions/options/${id}`,
+        fetch(`${apiURL}/api/classquestions/options/${id}`,
             {
                 method: 'GET',
                 headers: {
@@ -78,7 +80,7 @@ async function getOptionsQuestion(id){
 
 async function getOptionsQuiz(id){
     return new Promise((resolve, reject) => {
-        fetch(`http://localhost:5100/` , //to be implemented
+        fetch(`${apiURL}/` , //to be implemented
             {
                 method: 'GET',
                 headers: {

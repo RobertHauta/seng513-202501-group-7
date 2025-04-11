@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+const apiURL = import.meta.env.VITE_SERVER_URL;
 
 function RegisterForm() {
   const navigate = useNavigate();
@@ -82,7 +83,7 @@ async function createUser(name, email, password, role){
   }
     
   return new Promise((resolve, reject) => {
-    fetch(`http://localhost:5100/api/register`, {
+    fetch(`${apiURL}/api/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

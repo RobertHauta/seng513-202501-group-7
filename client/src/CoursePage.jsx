@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
+const apiURL = import.meta.env.VITE_SERVER_URL;
 
 function CoursePage() {
   const [quizzes, setQuizzes] = useState([]);
@@ -115,7 +116,7 @@ export default CoursePage;
 
 function getQuizzes(course_id){
   return new Promise((resolve, reject) => {
-    fetch(`http://localhost:5100/api/quiz/${course_id}`, {
+    fetch(`${apiURL}/api/quiz/${course_id}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
@@ -140,7 +141,7 @@ function getQuizzes(course_id){
 
 function getClassQuestions(course_id){
   return new Promise((resolve, reject) => {
-    fetch(`http://localhost:5100/api/classrooms/question/${course_id}`, {
+    fetch(`${apiURL}/api/classrooms/question/${course_id}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'

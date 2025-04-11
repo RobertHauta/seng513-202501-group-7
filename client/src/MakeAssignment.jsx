@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
+const apiURL = import.meta.env.VITE_SERVER_URL;
+
 function MakeAssignment(){
     const [questions, setQuestions] = useState([]);
     const formRefs = useRef([]);
@@ -254,19 +256,6 @@ const QuestionForm = forwardRef((props, ref) => {
     )
 });
 
-// {
-//     userId,
-//     role_id,
-//     classroom_id,
-//     question_text, --
-//     type_id, --
-//     correct_answer, -- 
-//     posted_at, --
-//     weight, --
-//     expiry_time, --
-
-//   }
-
 function convertRoleToId(roleName) {
     switch(roleName) {
       case "Professor": return 1;
@@ -278,7 +267,7 @@ function convertRoleToId(roleName) {
 
 async function createClassQuestion(data){
     return new Promise((resolve, reject) => {
-        fetch("http://localhost:5100/api/classrooms/question", {
+        fetch(`${apiURL}/api/classrooms/question`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -300,7 +289,7 @@ async function createClassQuestion(data){
 
 async function createQuiz(data){
     return new Promise((resolve, reject) => {
-        fetch("http://localhost:5100/api/quiz/create", {
+        fetch(`${apiURL}/api/quiz/create`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
