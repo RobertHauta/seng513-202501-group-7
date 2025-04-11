@@ -192,13 +192,152 @@ const getQuestionsForQuiz = async (req, res) => {
   }
 };
 
+const getQuizClassList = async (req, res) => {
+  const { quizId, classroomId } = req.params;
+
+  if (!quizId) {
+    return res.status(400).json({ error: 'Quiz ID is required' });
+  }
+  if (!classroomId) {
+    return res.status(400).json({ error: 'Classroom ID is required' });
+  }
+  
+  const client = await postgresPool.connect();
+  try {
+    const queryText = `
+      SELECT u.id, u.name, g.score
+      FROM Users u
+      JOIN ClassroomMembers cm ON cm.user_id = u.id
+      LEFT JOIN Grades g ON g.student_id = u.id AND g.quiz_id = $1
+      WHERE u.role_id = 3 AND cm.classroom_id = $2
+    `;
+    const { rows } = await client.query(queryText, [quizId, classroomId]);
+    return res.status(200).json({ quizStudents: rows });
+  } catch (error) {
+    console.error('Error fetching students grades:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    client.release();
+  }
+};
+
+const checkStudentSubmitted = async (req, res) => {
+  const { quizId, studentId } = req.params;
+
+  if (!quizId) {
+    return res.status(400).json({ error: 'Quiz ID is required' });
+  }
+  if (!studentId) {
+    return res.status(400).json({ error: 'Student ID is required' });
+  }
+  
+  const client = await postgresPool.connect();
+  try {
+    const queryText = `
+      SELECT count(*)
+      FROM Grades
+      WHERE quiz_id = $1 and student_id = $2
+    `;
+    const { rows } = await client.query(queryText, [quizId, studentId]);
+    const count = parseInt(rows[0].count, 10);
+    return res.status(200).json({ submittedQuiz: count > 0 });
+  } catch (error) {
+    console.error('Error fetching if student has submitted:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    client.release();
+  }
+};
+
+const getSubmittedQuiz = async (req, res) => {
+  const { quizId, studentId } = req.params;
+
+  if (!quizId) {
+    return res.status(400).json({ error: 'Quiz ID is required' });
+  }
+  if (!studentId) {
+    return res.status(400).json({ error: 'Student ID is required' });
+  }
+  
+  const client = await postgresPool.connect();
+  try {
+    const queryText = `
+      SELECT 
+        q.id AS question_id,
+        q.question_text,
+        q.marks,
+        q.correct_answer,
+        json_agg(DISTINCT json_build_object(
+          'option_id', o.id,
+          'option_text', o.option_text,
+          'is_correct', o.is_correct
+        )) FILTER (WHERE o.id IS NOT NULL) AS options,
+        json_agg(DISTINCT sa.selected_answer) FILTER (WHERE sa.selected_answer IS NOT NULL) AS student_answers
+      FROM questions q
+      LEFT JOIN StudentAnswers sa 
+        ON sa.question_id = q.id AND sa.student_id = $2
+      LEFT JOIN Options o 
+        ON o.question_id = q.id
+      WHERE q.quiz_id = $1
+      GROUP BY q.id, q.question_text, q.marks, q.correct_answer
+    `;
+    const { rows } = await client.query(queryText, [quizId, studentId]);
+    return res.status(200).json({ submittedQuizQuestions: rows });
+  } catch (error) {
+    console.error('Error fetching students submitted quiz:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    client.release();
+  }
+};
+
+const getUnansweredQuiz = async (req, res) => {
+  const { quizId } = req.params;
+
+  if (!quizId) {
+    return res.status(400).json({ error: 'Quiz ID is required' });
+  }
+  
+  const client = await postgresPool.connect();
+  try {
+    const queryText = `
+      SELECT 
+        q.id AS question_id,
+        q.question_text,
+        q.marks,
+        q.correct_answer,
+        json_agg(DISTINCT json_build_object(
+          'option_id', o.id,
+          'option_text', o.option_text,
+          'is_correct', o.is_correct
+        )) FILTER (WHERE o.id IS NOT NULL) AS options
+      FROM questions q
+      LEFT JOIN Options o 
+        ON o.question_id = q.id
+      WHERE q.quiz_id = $1
+      GROUP BY q.id, q.question_text, q.marks, q.correct_answer
+    `;
+    const { rows } = await client.query(queryText, [quizId]);
+    return res.status(200).json({ quizQuestions: rows });
+  } catch (error) {
+    console.error('Error fetching quiz details (not submitted):', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    client.release();
+  }
+};
+
 
 const quizQueries = {
     getQuizzes,
     getUnfinishedQuizzesForStudent,
     createQuiz,
     createQuizQuestion,
-    getQuestionsForQuiz
+    getQuestionsForQuiz,
+    getQuizClassList,
+    checkStudentSubmitted,
+    getSubmittedQuiz,
+    getUnansweredQuiz
 };
 
 export default quizQueries;
