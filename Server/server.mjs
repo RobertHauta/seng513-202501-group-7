@@ -128,18 +128,11 @@ app.get('/api/quiz/questions/:quizId', (req, res) => {
     queries.quiz.getQuestionsForQuiz(req, res);
 });
 
-app.get('/api/quiz/:quizId/:classroomId', (req, res) => {
-    // This is for when a professor or a TA clicks on a quiz, taking them to a page where they see a class list with the students scores
-    // Retrieves the students id as u.id, students name as u.name, and students grade as g.score (will be null if the quiz is not done)
-    // Pass In: quizId, classroomId
-    queries.quiz.getQuizClassList(req, res);
-});
-
 //The next 3 apis should be called in order
 //Call the check submission first to see if the quiz has been submitted by the student first
 //It will return a boolean for if it was submitted or not
 app.get('/api/quiz/check-submission/:quizId/:studentId', (req, res) => {
-    quizQueries.checkStudentSubmitted(req, res);
+    queries.quiz.checkStudentSubmitted(req, res);
 });
 
 //If it was submitted, then use this api, it will recieve the a whole bunch of stuff, take a look at what is selected
@@ -177,7 +170,7 @@ app.get('/api/quiz/check-submission/:quizId/:studentId', (req, res) => {
 // Careful about "correct_answer": "Orange, Apple", as that is from Questions.correct_answer, which just holds a string, for questions with multiple answers,
 // We need to make sure to input both answers. Same for the api below
 app.get('/api/quiz/submitted/:quizId/:studentId', (req, res) => {
-    quizQueries.getSubmittedQuiz(req, res);
+    queries.quiz.getSubmittedQuiz(req, res);
 });
 
 //If it was not submitted, we just get the questions and the options for the quiz, please check yourself to see what is selected
@@ -207,8 +200,16 @@ app.get('/api/quiz/submitted/:quizId/:studentId', (req, res) => {
 //       }
 //     ]
 // }
-app.get('/api/quiz/unanswered/:quizId', (req, res) => {
-    quizQueries.getUnansweredQuiz(req, res);
+app.get('/api/quiz/unansweredQuiz/:quizId', (req, res) => {
+    queries.quiz.getUnansweredQuiz(req, res);
+});
+
+
+app.get('/api/quiz/:quizId/:classroomId', (req, res) => {
+    // This is for when a professor or a TA clicks on a quiz, taking them to a page where they see a class list with the students scores
+    // Retrieves the students id as u.id, students name as u.name, and students grade as g.score (will be null if the quiz is not done)
+    // Pass In: quizId, classroomId
+    queries.quiz.getQuizClassList(req, res);
 });
 
 app.listen(5000, () => {

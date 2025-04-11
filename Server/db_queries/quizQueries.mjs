@@ -267,12 +267,12 @@ const getSubmittedQuiz = async (req, res) => {
         q.question_text,
         q.marks,
         q.correct_answer,
-        json_agg(DISTINCT json_build_object(
+        jsonb_agg(DISTINCT jsonb_build_object(
           'option_id', o.id,
           'option_text', o.option_text,
           'is_correct', o.is_correct
         )) FILTER (WHERE o.id IS NOT NULL) AS options,
-        json_agg(DISTINCT sa.selected_answer) FILTER (WHERE sa.selected_answer IS NOT NULL) AS student_answers
+        jsonb_agg(DISTINCT sa.selected_answer) FILTER (WHERE sa.selected_answer IS NOT NULL) AS student_answers
       FROM questions q
       LEFT JOIN StudentAnswers sa 
         ON sa.question_id = q.id AND sa.student_id = $2
@@ -306,7 +306,7 @@ const getUnansweredQuiz = async (req, res) => {
         q.question_text,
         q.marks,
         q.correct_answer,
-        json_agg(DISTINCT json_build_object(
+        jsonb_agg(DISTINCT jsonb_build_object(
           'option_id', o.id,
           'option_text', o.option_text,
           'is_correct', o.is_correct
