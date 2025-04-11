@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
+const apiURL = import.meta.env.VITE_SERVER_URL;
+
 function ClassList(){
     const navigate = useNavigate();
     const location = useLocation();
@@ -61,7 +63,7 @@ export default ClassList;
 
 async function getClassList(class_id) {
     return new Promise((resolve, reject) => {
-        fetch(`http://localhost:5100/api/classrooms/classlist/${class_id}`, {
+        fetch(`${apiURL}/api/classrooms/classlist/${class_id}`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json'

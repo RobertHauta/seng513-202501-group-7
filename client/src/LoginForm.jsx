@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+const apiURL = import.meta.env.VITE_SERVER_URL;
+console.log('API URL:', apiURL);
 
 function LoginForm(props) {
   const navigate = useNavigate();
@@ -39,7 +41,7 @@ function LoginForm(props) {
 export default LoginForm;
 
 async function getUser(email, password) {
-  return new Promise((resolve, reject) => {fetch('http://localhost:5100/api/login', {
+  return new Promise((resolve, reject) => {fetch(`${apiURL}/api/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

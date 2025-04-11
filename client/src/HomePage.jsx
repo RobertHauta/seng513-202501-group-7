@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+const apiURL = import.meta.env.VITE_SERVER_URL;
 
 function HomePage(props) {
   const [classroom, setClassroom] = useState([]);
@@ -127,7 +128,7 @@ function convertRoleToId(roleName) {
 
 async function getStudentClasses(userId) {
   return new Promise((resolve, reject) => {
-    fetch(`http://localhost:5100/api/classrooms/${userId}`, {
+    fetch(`${apiURL}/api/classrooms/${userId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
@@ -151,7 +152,7 @@ async function getStudentClasses(userId) {
 
 async function getProfessorClasses(userId) {
   return new Promise((resolve, reject) => {
-    fetch(`http://localhost:5100/api/classrooms/professors/${userId}`, {
+    fetch(`${apiURL}/api/classrooms/professors/${userId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
@@ -175,7 +176,7 @@ async function getProfessorClasses(userId) {
 
 async function createNewClass(data){
   return new Promise((resolve, reject) => {
-    fetch('http://localhost:5100/api/classrooms/create', {
+    fetch(`${apiURL}/api/classrooms/create`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -210,7 +211,7 @@ async function createNewClass(data){
 
 async function enrollStudentInClass(user_id, class_id, role_id){
   return new Promise((resolve, reject) => {
-    fetch(`http://localhost:5100/api/classrooms/add`, {
+    fetch(`${apiURL}/api/classrooms/add`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

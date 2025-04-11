@@ -15,4 +15,6 @@ export default defineConfig({
     host: '0.0.0.0',  // Allows access from outside the container
     port: 3000,        // Default port Vite uses
   },
+  // Add this section to make environment variables available
+  envPrefix: 'VITE_',
 })
