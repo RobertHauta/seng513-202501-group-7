@@ -12,6 +12,10 @@ function QuizPage(){
 
     }
 
+    function handleNext(){
+        
+    }
+
     return (
         <div>
             <h1>{location.state.quizObject.title}</h1>
@@ -33,7 +37,8 @@ function QuizPage(){
                     </div>
                     <Question objectData={location.state.quizObject} isClassQuestion={false} />
                 </div>
-                <button onClick={handleSubmit}>Submit Quiz</button>
+                <button style={{marginRight: "auto"}} onClick={handleSubmit}>Submit Quiz</button>
+                <button onClick={handleNext}>Next Question</button>
             </div>
         </div>
     )
