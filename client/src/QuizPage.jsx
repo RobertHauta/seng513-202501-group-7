@@ -23,7 +23,13 @@ function QuizPage(){
 
                 <div className='gridContainer' style={{gridTemplateRows: "1fr", margin: "1em auto"}}>
                     <div className='container' style={{backgroundColor: '#5e5e5e'}}>
-
+                        <div className="classes">
+                            {questions.map((_, index) => (
+                                <div className="card" style={{cursor: "pointer", backgroundColor: "#1a1a1a", textAlign: "center"}} key={index}>
+                                    <h2>{index + 1}</h2>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                     <Question objectData={location.state.quizObject} isClassQuestion={false} />
                 </div>

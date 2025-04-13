@@ -57,7 +57,7 @@ function CoursePage() {
             </div>
 
             <div className='container' style={{backgroundColor: '#5e5e5e'}}>
-              <div className='card' style={{backgroundColor: '#1a1a1a', width: 'fit-content', height: 'fit-content'}}>
+              <div className='card' style={{backgroundColor: '#1a1a1a', width: 'fit-content', height: 'fit-content', border: 0}}>
                 {location.state.user.role_name === "Student" ? (
                   <p style={{margin: '0'}}>Total Grade: {}</p>
                 ) : (
