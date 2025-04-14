@@ -14,7 +14,9 @@ function ClassList(){
           let response = await getClassList(location.state.id);
           console.log(response);
           if(([1,2,3].includes(response))){ return; }
-          setClassList(() => [...response.students]);
+
+          const sortedList = [...response.students].sort((a, b) => a.role_id - b.role_id);
+          setClassList(sortedList);
         }
         fetchList();
     }, []);
@@ -31,26 +33,35 @@ function ClassList(){
                 <table>
                     <thead>
                         <tr>
-                            <th>User Name</th>
-                            <th>User Email</th>
-                            <th>User Role</th>
+                            <th>{location.state.headers[0]}</th>
+                            <th>{location.state.headers[1]}</th>
+                            <th>{location.state.headers[2]}</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {classList.filter((student) => student.role_id === 2).map((student) => (
-                            <tr key={student.id}>
-                                <td>{student.name}</td>
-                                <td>{student.email}</td>
-                                <td>{convertIdToRole(student.role_id)}</td>
-                            </tr>
-                        ))}
-                        {classList.filter((student) => student.role_id === 3).map((student) => (
-                            <tr key={student.id}>
-                                <td>{student.name}</td>
-                                <td>{student.email}</td>
-                                <td>{convertIdToRole(student.role_id)}</td>
-                            </tr>
-                        ))}
+                        {location.state.headers[2] === "Role" ? (
+                            classList.map((user) => (
+                                <tr key={user.id}>
+                                    <td>{user.name}</td>
+                                    <td>{user.email}</td>
+                                    <td>{convertIdToRole(user.role_id)}</td>
+                                </tr>
+                            ))
+                        ) : (
+                            classList.filter((student) => student.role_id === 3).map((student) => (
+                                <tr key={student.id}>
+                                    <td>{student.name}</td>
+                                    <td>FILL WITH GRADE</td>
+                                    <td>
+                                        {location.state.quizObject != null ? (
+                                            <button onClick={() => navigate('/QuizPage' , {state: {quizObject: location.state.quizObject, name: location.state.name, id: location.state.id, user: location.state.user}})}>View Quiz</button>
+                                        ) : (
+                                            <button onClick={() => navigate('/QuestionPage', {state: {classQuestion: location.state.classQuestion, name: location.state.name, id: location.state.id, user: location.state.user}})}>View Question</button>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))
+                        )}
                     </tbody>
                 </table>
             </div>

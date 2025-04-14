@@ -13,7 +13,7 @@ function QuizPage(){
     }
 
     function handleNext(){
-        
+
     }
 
     return (
@@ -35,7 +35,7 @@ function QuizPage(){
                             ))}
                         </div>
                     </div>
-                    <Question objectData={location.state.quizObject} isClassQuestion={false} />
+                    <Question objectData={questions[0]} isClassQuestion={false} />
                 </div>
                 <button style={{marginRight: "auto"}} onClick={handleSubmit}>Submit Quiz</button>
                 <button onClick={handleNext}>Next Question</button>

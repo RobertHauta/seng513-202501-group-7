@@ -91,8 +91,8 @@ form{
   align-items: center;
 }
 
-input{
-  margin-bottom: 10px;
+input, fieldset{
+  margin: 10px 1em 10px 1em;
 }
 
 .classes{
@@ -153,7 +153,7 @@ body.popup-active {
   user-select: none;
 }
 
-.quizzes h3:hover{
+.quizzes h3:hover, .selectedOption{
   border: 1px solid #646cff;
 }
 
@@ -170,13 +170,12 @@ th, td {
 
 th {
   color: black;
-  background-color: #f4f4f4;
+  background-color: #939393;
   font-weight: bold;
 }
 
 tr:nth-child(even) {
-  background-color: #f9f9f9;
-  color: black;
+  background-color: #ffffff17;
 }
 
 @media (max-width: 768px){

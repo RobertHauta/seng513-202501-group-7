@@ -4,6 +4,7 @@ const apiURL = import.meta.env.VITE_SERVER_URL;
 
 function Question(props){
     const [options, setOptions] = useState([]);
+    const [activeOption, setActiveOption] = useState(null);
 
     useEffect(() => { //Run on load
         const fetchOptions = async () => {
@@ -30,8 +31,8 @@ function Question(props){
                     )}
                     {props.objectData.type_id === 2 && (
                         <div className='optionsContainer'>
-                            {options.map(option => (
-                                <div className='container'>
+                            {options.map((option,index) => (
+                                <div className={activeOption === index ? "container selectedOption" : "container"} key={index} onClick={() => setActiveOption(index)}>
                                     <p>{option.option_text}</p>
                                 </div>
                                 ))
@@ -40,10 +41,10 @@ function Question(props){
                     )}
                     {props.objectData.type_id === 3 && (
                         <div className='optionsContainer'>
-                            <div className='container'>
+                            <div className={activeOption === 1 ? "container selectedOption" : "container"} onClick={() => setActiveOption(1)}>
                                 <p>True</p>
                             </div>
-                            <div className='container'>
+                            <div className={activeOption === 0 ? "container selectedOption" : "container"} onClick={() => setActiveOption(0)}>
                                 <p>False</p>
                             </div>
                         </div>

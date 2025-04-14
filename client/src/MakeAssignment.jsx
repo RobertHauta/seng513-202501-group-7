@@ -92,15 +92,23 @@ function MakeAssignment(){
                     <button style={{marginRight: "auto"}} onClick={() => navigate('/CoursePage', {state: {name: location.state.name, id: location.state.id, user: location.state.user}})}>Return to Course</button>
                     <button onClick={() => navigate('/')}>Log Out</button>
                 </div>
-                <div>
-                    <label>Release Date:</label>
-                    <input id="rel" type="date"></input>
-                    <label>Due Date:</label>
-                    <input id="due" type="date"></input>
-                    <label>Weight:</label>
-                    <input id='weight' type="number"></input>
-                    <label>Assignment Name</label>
-                    <input id='assName' type="text"></input>
+                <div style={{display: "flex", justifyContent: "space-around", marginTop: "1em"}}>
+                    <div>
+                        <label>Release Date:</label>
+                        <input id="rel" type="date"></input>
+                    </div>
+                    <div>
+                        <label>Due Date:</label>
+                        <input id="due" type="date"></input>
+                    </div>
+                    <div>
+                        <label>Weight:</label>
+                        <input id='weight' type="number"></input>
+                    </div>
+                    <div>
+                        <label>Assignment Name</label>
+                        <input id='assName' type="text"></input>
+                    </div>
                 </div>
                 <div>
                     {location.state.type === "quiz" ? (
@@ -111,14 +119,17 @@ function MakeAssignment(){
                                     <QuestionForm ref={(el) => (formRefs.current[index] = el)} />
                                 </div>
                             ))}
-                            <button id="addQuestion" onClick={addQuestionForm}>+</button>
+                            <div style={{display: "flex", marginTop: "1em"}}>
+                                <button id="addQuestion" style={{marginRight: "auto"}} onClick={addQuestionForm}>+</button>
+                                <button onClick={handleSubmitAll}>Create Assignment</button>
+                            </div>
                         </div>
                     ) : (
                         <div className='container' style={{backgroundColor: '#5e5e5e'}}>
                             <QuestionForm ref={(el) => (formRefs.current[0] = el)}/>
+                            <button onClick={handleSubmitAll}>Create Assignment</button>
                         </div>
                     )}
-                    <button onClick={handleSubmitAll}>Create Assignment</button>
                 </div>
             </div>
         </div>
@@ -231,23 +242,23 @@ const QuestionForm = forwardRef((props, ref) => {
                 <div>
                     <div>
                         <label>Matching Pair 1: </label>
-                        <input type="text" name="pair1" required />
-                        <input type="text" name="pair2" required />
+                        <input type="text" name="pair11" required />
+                        <input type="text" name="pair21" required />
                     </div>
                     <div>
                         <label>Matching Pair 2: </label>
-                        <input type="text" name="pair1" required />
-                        <input type="text" name="pair2" required />
+                        <input type="text" name="pair12" required />
+                        <input type="text" name="pair22" required />
                     </div>
                     <div>
                         <label>Matching Pair 3: </label>
-                        <input type="text" name="pair1" required />
-                        <input type="text" name="pair2" required />
+                        <input type="text" name="pair13" required />
+                        <input type="text" name="pair23" required />
                     </div>
                     <div>
                         <label>Matching Pair 4: </label>
-                        <input type="text" name="pair1" required />
-                        <input type="text" name="pair2" required />
+                        <input type="text" name="pair14" required />
+                        <input type="text" name="pair24" required />
                     </div>
                 </div>
                 
