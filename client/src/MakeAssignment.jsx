@@ -198,10 +198,6 @@ const QuestionForm = forwardRef((props, ref) => {
                 <input type="radio" name="question" value="TF" onChange={handleChange} required />
                 True or False
                 </label>
-                <label>
-                <input type="radio" name="question" value="Match" onChange={handleChange} required />
-                Matching
-                </label>
             </fieldset>
 
             {type === "MC" && (
@@ -236,32 +232,6 @@ const QuestionForm = forwardRef((props, ref) => {
                     <input type="radio" name="correctOption" value="False" />
                     <label>False</label>
                 </div>
-            )}
-
-            {type === "Match" && (
-                <div>
-                    <div>
-                        <label>Matching Pair 1: </label>
-                        <input type="text" name="pair11" required />
-                        <input type="text" name="pair21" required />
-                    </div>
-                    <div>
-                        <label>Matching Pair 2: </label>
-                        <input type="text" name="pair12" required />
-                        <input type="text" name="pair22" required />
-                    </div>
-                    <div>
-                        <label>Matching Pair 3: </label>
-                        <input type="text" name="pair13" required />
-                        <input type="text" name="pair23" required />
-                    </div>
-                    <div>
-                        <label>Matching Pair 4: </label>
-                        <input type="text" name="pair14" required />
-                        <input type="text" name="pair24" required />
-                    </div>
-                </div>
-                
             )}
         </form>       
     )

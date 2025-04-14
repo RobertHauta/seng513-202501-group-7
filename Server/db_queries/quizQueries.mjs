@@ -201,13 +201,125 @@ const getQuestionsForQuiz = async (req, res) => {
   }
 };
 
+const gradeQuiz = async (req, res) => {
+  const {quizId, studentId, answers} = req.body;
+  if (!quizId) {
+    return res.status(400).json({ error: 'Quiz ID is required' });
+  }
+  if (!studentId) {
+    return res.status(400).json({ error: 'Student ID is required' });
+  }
+  if (!answers.length) {
+    return res.status(400).json({ error: 'Answers are required' });
+  }
+  const client = await postgresPool.connect();
+
+  try {
+    await client.query('BEGIN');
+    
+    let totMarks = 0;
+    let earnedMarks = 0;
+
+    for (const answer of answers) {
+      const {question_id, option_text, id, isMC} = answer;
+      if (!question_id) {
+        return res.status(400).json({ error: 'Question ID is required' });
+      }
+      if (!option_text &&!id) {
+        return res.status(400).json({ error: 'Answer text or option ID is required' });
+      }
+      if (isMC &&!id) {
+        return res.status(400).json({ error: 'MC answer option ID is required' });
+      }
+
+      let isCorrect = null;
+
+      if(isMC){
+        const correctAnswerQuery = `
+          SELECT is_correct
+          FROM Options
+          WHERE question_id = $1 AND id = $2
+          `;
+        const { rows } = await client.query(correctAnswerQuery, [question_id, id]);
+        isCorrect = rows[0] ? rows[0].is_correct : null;
+        if (isCorrect === null) {
+          return res.status(400).json({ error: 'Invalid option ID for the given question' });
+        }
+      }
+      else{
+        const correctAnswerQuery = `
+          SELECT correct_answer
+          FROM Questions
+          WHERE id = $1
+          `;
+        const { rows } = await client.query(correctAnswerQuery, [question_id]);
+        isCorrect = rows[0] ? rows[0].correct_answer === answer.option_text : null;
+        if (isCorrect === null) {
+          return res.status(400).json({ error: 'Invalid answer ID for the given question' });
+        }
+      }
+      totMarks++;
+      if (isCorrect) {
+        earnedMarks++;
+      }
+
+      const queryText = `
+        INSERT INTO StudentAnswers (question_id, student_id, selected_answer, is_correct, submitted_at)
+        VALUES ($1, $2, $3, $4, NOW())
+      `;
+      await client.query(queryText, [question_id, studentId, option_text, isCorrect]);
+    }
+
+    const gradeQuizQuery = `
+        INSERT INTO Grades (student_id, quiz_id, score)
+        VALUES ($1, $2, $3)
+        RETURNING score
+        `;
+    const { rows1: gradeRows } = await client.query(gradeQuizQuery, [studentId, quizId, earnedMarks/totMarks]);
+
+    await client.query('COMMIT');
+    return res.status(200).json({ grade: {earnedMarks, totMarks} });
+    } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error grading quiz:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    client.release();
+  }
+}
+
+const getQuestionOptions = async (req, res) => {
+  const { questionId } = req.params;
+  if (!questionId) {
+    return res.status(400).json({ error: 'Question ID is required' });
+  }
+  const client = await postgresPool.connect();
+
+  try{
+    const query = `
+      SELECT *
+      FROM Options
+      WHERE question_id = $1
+    `;
+    const { rows } = await client.query(query, [questionId]);
+    return res.status(200).json({ options: rows });
+  } catch (error) {
+    console.error('Error fetching question options:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    client.release();
+  }
+};
+
 
 const quizQueries = {
     getQuizzes,
     getUnfinishedQuizzesForStudent,
     createQuiz,
     createQuizQuestion,
-    getQuestionsForQuiz
+    getQuestionsForQuiz,
+    gradeQuiz,
+    getQuestionOptions
 };
 
 export default quizQueries;

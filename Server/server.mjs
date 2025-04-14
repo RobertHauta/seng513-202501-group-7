@@ -90,6 +90,20 @@ app.get('/api/classrooms/question/:classroomId', (req, res) => {
     queries.classroomQuestions.getClassroomQuestions(req, res);
 });
 
+app.get('/api/classrooms/grades/:classroomId/:userId', (req, res) => {
+    //This is for getting the grades for a specific student in a specific classroom
+    // Retrieves * from grades
+    // Pass in: classroomId, studentId
+    queries.users.getStudentGrades(req, res);
+});
+
+app.get('/api/classrooms/average/:classroomId', (req, res) => {
+    //This is for getting the average grade for a specific classroom
+    // Retrieves * from grades
+    // Pass in: classroomId
+    queries.users.getClassGrades(req, res);
+});
+
 app.get('/api/classquestions/unfinished/:classroomId/:studentId', (req, res) => {
     //This is for displaying on classroom home page for a student. 
     //Gets all unfinished classroomQuestions for a specific student in a specific classroom
@@ -104,6 +118,11 @@ app.get('/api/classquestions/options/:questionId', (req, res) => {
     queries.classroomQuestions.getQuestionOptions(req, res);
 });
 
+app.get('/api/classquestions/submit/:questionId/:selectedOption/:studentId', (req, res) => {
+    //This is for submitting a question answer for a specific question
+    // Pass in: questionId, selectedOptionId, studentId
+    queries.classroomQuestions.validateCorrectAnswer(req, res);
+});
 
 
 
@@ -115,6 +134,12 @@ app.post('/api/quiz/create', (req, res) => {
     queries.quiz.createQuiz(req, res);
 });
 
+app.get('/api/quiz/question/options/:questionId', (req, res) => {
+    //This is for getting all options for a specific question
+    // Retrieves * from options
+    // Pass in: questionId
+    queries.quiz.getQuestionOptions(req, res);
+});
 
 app.post('/api/quiz/question/create', (req, res) => {
     //Creates a question for a quiz, doesn't work for class questions since that is in a different table. 
@@ -144,6 +169,12 @@ app.get('/api/quiz/questions/:quizId', (req, res) => {
     // Pass In: quizId
 
     queries.quiz.getQuestionsForQuiz(req, res);
+});
+
+app.post('/api/quiz/submit', (req, res) => {
+    //This is for submitting a quiz answer for a specific quiz
+    // Pass In: quiz_id, student_id, selected_answer for body
+    queries.quiz.gradeQuiz(req, res);
 });
 
 

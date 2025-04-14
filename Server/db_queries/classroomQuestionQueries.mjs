@@ -276,7 +276,7 @@ const getUnfinishedClassQuestionsForStudent = async (req, res) => {
         )
     `;
     const { rows } = await client.query(query, [classroomId, studentId]);
-    return res.status(200).json({ classQuestions: rows });
+    return res.status(200).json({ questions: rows });
   } catch (error) {
     console.error('Error fetching unfinished class questions:', error);
     return res.status(500).json({ error: 'Internal server error' });
@@ -308,9 +308,83 @@ const getQuestionOptions = async (req, res) => {
   }
 };
 
+const validateCorrectAnswer = async (req, res) => {
+  const { questionId, selectedOption, studentId } = req.params;
+  const selected = JSON.parse(selectedOption);
+
+  if (!questionId) {
+    return res.status(400).json({ error: 'Question ID is required' });
+  }
+  if (!selected) {
+    return res.status(400).json({ error: 'Selected option ID is required' });
+  }
+  if (!studentId) {
+    return res.status(400).json({ error: 'Student ID is required' });
+  }
+  const client = await postgresPool.connect();
+  try {
+    let isCorrect = null;
+    if(!['True', 'False'].includes(selected)) {
+      const query = `
+        SELECT is_correct
+        FROM Options
+        WHERE class_question_id = $1 AND id = $2
+      `;
+      const { rows } = await client.query(query, [questionId, selected.id]);
+      if (rows.length === 0) {
+        return res.status(404).json({ error: 'Option not found' });
+      }
+      isCorrect = rows[0].is_correct;
+    } else{
+      const query = `
+        SELECT correct_answer
+        FROM ClassQuestions
+        WHERE id = $1
+      `;
+      const { rows } = await client.query(query, [questionId]);
+      if (rows.length === 0) {
+        return res.status(404).json({ error: 'Question not found' });
+      }
+      isCorrect = rows[0].correct_answer === selected;
+    }
+
+    if(isCorrect === null) {
+      return res.status(400).json({ error: 'Invalid selected option' });
+    }
+
+    const insertQuery = `
+      INSERT INTO studentanswers (student_id, class_question_id, is_correct, selected_answer, submitted_at)
+      VALUES ($1, $2, $3, $4, NOW())
+      RETURNING id
+      `;
+
+    const text = ['True', 'False'].includes(selected) ? selected : selected.option_text;
+    console.log(text);
+
+    const { rows } = await client.query(insertQuery, [
+      studentId,
+      questionId,
+      isCorrect,
+      text
+    ]);
+
+    if(rows.length === 0) {
+      return res.status(400).json({ error: 'Student answer could not be saved' });
+    }
+
+    return res.status(200).json({ isCorrect: rows[0].is_correct });
+  } catch (error) {
+    console.error('Error validating correct answer:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    client.release();
+  }
+}
+
 export default {
     createClassroomQuestion,
     getClassroomQuestions,
     getUnfinishedClassQuestionsForStudent,
-    getQuestionOptions
+    getQuestionOptions,
+    validateCorrectAnswer
 };

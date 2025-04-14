@@ -203,3 +203,14 @@ tr:nth-child(even) {
   }
 
 }
+
+.tabs{
+  width: 90%;
+  margin: 1em auto;
+  display: flex;
+  justify-content: space-between;
+}
+
+.tabs > button{
+  width: 100%;
+}

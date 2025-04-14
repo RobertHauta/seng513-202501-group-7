@@ -215,13 +215,97 @@ const verifyUserRole = async (req, res) => {
     }
 };
 
+const getStudentGrades = async (request, response) => {
+  const userId = request.params.userId;
+  const classroomId = request.params.classroomId;
+
+  if (!userId ||!classroomId) {
+    response.status(400).json({ error: 'User ID and classroom ID are required' });
+    return;
+  }
+  const client = await postgresPool.connect();
+
+  try {
+    const query = `
+      SELECT grades.score as score, quizzes.title as name, quizzes.total_weight as weight
+      FROM grades
+      JOIN quizzes ON quizzes.id = grades.quiz_id
+      WHERE grades.student_id = $1 AND quizzes.classroom_id = $2 
+    `;
+    const { rows } = await client.query(query, [userId, classroomId]);
+    let result = rows.map(row => {
+      return {
+        score: (row.score * 100).toFixed(2) + '%',
+        name: row.name,
+        weight: (row.weight * row.score).toFixed(2) + "/" + row.weight
+      };
+    });
+    let finalGrade = 0;
+    let totalWeight = 0;
+    let scoredweight = 0;
+    rows.forEach(grade=>{
+      scoredweight += grade.score * grade.weight;
+      totalWeight += grade.weight;
+    });
+    finalGrade = (scoredweight / totalWeight * 100).toFixed(2) + '%';
+
+    response.status(200).json({ grades: result, finalGrade: finalGrade });
+  } catch (error) {
+    console.error('Error fetching student grades:', error);
+    response.status(500).json({ error: 'Internal server error' });
+  } finally {
+    client.release();
+  }
+};
+
+const getClassGrades = async (request, response) => {
+  const classroomId = request.params.classroomId;
+
+  if (!classroomId) {
+    response.status(400).json({ error: 'Classroom ID is required' });
+    return;
+  }
+  const client = await postgresPool.connect();
+  try {
+    const query = `
+      SELECT grades.score as score, quizzes.title as name, quizzes.total_weight as weight
+      FROM quizzes
+      JOIN grades ON quizzes.id = grades.quiz_id
+      WHERE quizzes.classroom_id = $1 
+    `;
+    const { rows } = await client.query(query, [classroomId]);
+    
+    const grouped = rows.reduce((acc, cur) => {
+      if (!acc[cur.name]) {
+        acc[cur.name] = { name: cur.name, scores: [] };
+      }
+      acc[cur.name].scores.push({
+        score: (cur.score * 100).toFixed(2) + '%',
+        weight: (cur.weight * cur.score).toFixed(2) + "/" + cur.weight
+      });
+      return acc;
+    }, []);
+
+    console.log(averaged);
+
+    response.status(200).json({ grades: rows });
+  }catch (error) {
+    console.error('Error fetching class grades:', error);
+    response.status(500).json({ error: 'Internal server error' });
+  } finally {
+    client.release();
+  }
+};
+
 const userQueries = {
     getUserByNamePass,
     createNewUser,
     deleteUserByEmail,
     getUserClassrooms,
     verifyUserRole,
-    getProfessorClassrooms
+    getProfessorClassrooms,
+    getStudentGrades,
+    getClassGrades
 };
 
 export default userQueries;

@@ -22,29 +22,60 @@ function Question(props){
     return (
         <div className='container' style={{backgroundColor: '#5e5e5e'}}>
             <div>
-                <h2>Question</h2>
+                <h2>{props.isClassQuestion ? ("Question") : (`Question ${props.questionIndex + 1}`)}</h2>
                 <hr/>
                 <p>{props.objectData.question_text}</p>
                 <div>
-                    {props.objectData.type_id === 1 && (
-                        <div className='optionsContainer'></div>
-                    )}
                     {props.objectData.type_id === 2 && (
                         <div className='optionsContainer'>
                             {options.map((option,index) => (
-                                <div className={activeOption === index ? "container selectedOption" : "container"} key={index} onClick={() => setActiveOption(index)}>
-                                    <p>{option.option_text}</p>
-                                </div>
+                                props.isGrading === true ? (
+                                    <div className={activeOption === index ? "container selectedOption" : "container"} key={index}>
+                                        <p>{option.option_text}</p>
+                                    </div>
+                                ) : (
+                                    <div className={activeOption === index ? "container selectedOption" : "container"} key={index} 
+                                        onClick={() => {
+                                            setActiveOption(index);
+                                            if(props.isClassQuestion){
+                                                props.onOptionSelect && props.onOptionSelect(option);
+                                            }
+                                            else{
+                                                console.log(props.questionIndex);
+                                                props.onOptionSelect && props.onOptionSelect(option, props.questionIndex);
+                                            }
+                                        }}>
+                                        <p>{option.option_text}</p>
+                                    </div>
+                                )
                                 ))
                             }
                         </div>
                     )}
                     {props.objectData.type_id === 3 && (
                         <div className='optionsContainer'>
-                            <div className={activeOption === 1 ? "container selectedOption" : "container"} onClick={() => setActiveOption(1)}>
+                            <div className={activeOption === 1 ? "container selectedOption" : "container"} onClick={() => {
+                                            setActiveOption(1);
+                                            if(props.isClassQuestion){
+                                                props.onOptionSelect && props.onOptionSelect("True");
+                                            }
+                                            else{
+                                                console.log(props.questionIndex);
+                                                props.onOptionSelect && props.onOptionSelect("True", props.questionIndex);
+                                            }
+                                        }}>
                                 <p>True</p>
                             </div>
-                            <div className={activeOption === 0 ? "container selectedOption" : "container"} onClick={() => setActiveOption(0)}>
+                            <div className={activeOption === 0 ? "container selectedOption" : "container"} onClick={() => {
+                                            setActiveOption(0);
+                                            if(props.isClassQuestion){
+                                                props.onOptionSelect && props.onOptionSelect("False");
+                                            }
+                                            else{
+                                                console.log(props.questionIndex);
+                                                props.onOptionSelect && props.onOptionSelect("False", props.questionIndex);
+                                            }
+                                        }}>
                                 <p>False</p>
                             </div>
                         </div>
@@ -59,8 +90,6 @@ export default Question;
 
 async function getOptionsQuestion(id){
     return new Promise((resolve, reject) => {
-        console.log(id);
-
         fetch(`${apiURL}/api/classquestions/options/${id}`,
             {
                 method: 'GET',
@@ -81,7 +110,7 @@ async function getOptionsQuestion(id){
 
 async function getOptionsQuiz(id){
     return new Promise((resolve, reject) => {
-        fetch(`${apiURL}/` , //to be implemented
+        fetch(`${apiURL}/api/quiz/question/options/${id}` ,
             {
                 method: 'GET',
                 headers: {
@@ -94,7 +123,7 @@ async function getOptionsQuiz(id){
                 }
                 return res.json();
             })
-           })
            .then(data => resolve(data))
            .catch(error => reject(error));
+    });
 }

@@ -51,12 +51,15 @@ function ClassList(){
                             classList.filter((student) => student.role_id === 3).map((student) => (
                                 <tr key={student.id}>
                                     <td>{student.name}</td>
-                                    <td>FILL WITH GRADE</td>
+                                    <td>
+                                        FILL WITH GRADE
+                                        <button>Edit Grade</button>
+                                    </td>
                                     <td>
                                         {location.state.quizObject != null ? (
-                                            <button onClick={() => navigate('/QuizPage' , {state: {quizObject: location.state.quizObject, name: location.state.name, id: location.state.id, user: location.state.user}})}>View Quiz</button>
+                                            <button onClick={() => navigate('/QuizPage' , {state: {quizObject: location.state.quizObject, isGrading: true, name: location.state.name, id: location.state.id, user: location.state.user}})}>View Quiz</button>
                                         ) : (
-                                            <button onClick={() => navigate('/QuestionPage', {state: {classQuestion: location.state.classQuestion, name: location.state.name, id: location.state.id, user: location.state.user}})}>View Question</button>
+                                            <button onClick={() => navigate('/QuestionPage', {state: {classQuestion: location.state.classQuestion, isGrading: true, name: location.state.name, id: location.state.id, user: location.state.user}})}>View Question</button>
                                         )}
                                     </td>
                                 </tr>
