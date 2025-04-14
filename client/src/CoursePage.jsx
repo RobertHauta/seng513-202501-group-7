@@ -31,7 +31,7 @@ function CoursePage() {
       <div className="container">
           <div style={{display: 'flex'}}>
             <button type="button" onClick={() => navigate('/HomePage')}>Return to Home Page</button>
-            <button type="button" style={{marginRight: 'auto'}} onClick={() => navigate('/ClassList', {state: {name: location.state.name, id: location.state.id, user: location.state.user}})}>View Class List</button>
+            <button type="button" style={{marginRight: 'auto'}} onClick={() => navigate('/ClassList', {state: {name: location.state.name, id: location.state.id, user: location.state.user, headers: ['Name','E-Mail','Role']}})}>View Class List</button>
             <button onClick={() => navigate('/')}>Logout</button>
           </div>
           
@@ -48,7 +48,11 @@ function CoursePage() {
               <div className="quizzes">
                 {quizzes.map(quiz => (
                         <div style={{display: 'flex'}} key={quiz.id}>
-                            <h3 className="container" style={{marginRight: '1em', backgroundColor: "#939393", cursor: "pointer"}} onClick={() => navigate('/QuizPage' , {state: {quizObject: quiz, name: location.state.name, id: location.state.id, user: location.state.user}})}>{quiz.title}</h3>
+                            {location.state.user.role_name === "Student" ? (
+                              <h3 className="container" style={{marginRight: '1em', backgroundColor: "#939393", cursor: "pointer"}} onClick={() => navigate('/QuizPage' , {state: {quizObject: quiz, name: location.state.name, id: location.state.id, user: location.state.user}})}>{quiz.title}</h3>
+                            ) : (
+                              <h3 className="container" style={{marginRight: '1em', backgroundColor: "#939393", cursor: "pointer"}} onClick={() => navigate('/ClassList', {state: {quizObject: quiz, name: location.state.name, id: location.state.id, user: location.state.user, headers: ['Student Name','Achieved Grade', null]}})}>{quiz.title}</h3>
+                            )}
                             <p className="container" style={{backgroundColor: '#1a1a1a'}}>Due: {quiz.due_date.substring(0, 10)}</p>
                         </div>
                     ))
@@ -57,7 +61,7 @@ function CoursePage() {
             </div>
 
             <div className='container' style={{backgroundColor: '#5e5e5e'}}>
-              <div className='card' style={{backgroundColor: '#1a1a1a', width: 'fit-content', height: 'fit-content'}}>
+              <div className='card' style={{backgroundColor: '#1a1a1a', width: 'fit-content', height: 'fit-content', border: 0}}>
                 {location.state.user.role_name === "Student" ? (
                   <p style={{margin: '0'}}>Total Grade: {}</p>
                 ) : (
@@ -98,10 +102,17 @@ function CoursePage() {
               )}
               <div className="classes">
                 {questions.map(question => (
-                        <div className="card" style={{backgroundColor: "#939393", cursor: "pointer"}} key={question.id} onClick={() => navigate('/QuestionPage', {state: {classQuestion: question, name: location.state.name, id: location.state.id, user: location.state.user}})}>
+                        location.state.user.role_name === "Student" ? (
+                          <div className="card" style={{backgroundColor: "#939393", cursor: "pointer"}} key={question.id} onClick={() => navigate('/QuestionPage', {state: {classQuestion: question, name: location.state.name, id: location.state.id, user: location.state.user}})}>
                             <h3>{question.name}</h3>
                             <p>{question.posted_at.substring(0, 10)}</p>
-                        </div>
+                          </div>
+                        ) : (
+                          <div className="card" style={{backgroundColor: "#939393", cursor: "pointer"}} key={question.id} onClick={() => navigate('/ClassList', {state: {classQuestion: question, name: location.state.name, id: location.state.id, user: location.state.user, headers: ['Student Name','Achieved Grade', null]}})}>
+                            <h3>{question.name}</h3>
+                            <p>{question.posted_at.substring(0, 10)}</p>
+                          </div>
+                        )
                     ))
                 }
               </div>

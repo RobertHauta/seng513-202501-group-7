@@ -57,7 +57,7 @@ function HomePage(props) {
           </div>
         ) : (
           <div style={{display: 'flex'}}>
-            <label htmlFor="course_id">Course ID: </label>
+            <label htmlFor="course_id" style={{marginTop: '8px'}}>Course ID: </label>
             <input type="text" name="course_id" id="course_id"/>
             <button style={{marginRight: 'auto'}} onClick={makeEnrollment}>Enroll</button>
             <button onClick={() => navigate('/')}>Logout</button>
@@ -68,6 +68,7 @@ function HomePage(props) {
           {classroom.map(course => (
             <div className="card" style={{cursor: "pointer"}} key={course.id} onClick={() => navigate('/CoursePage', {state: {name: course.name, id: course.id, user: props.userData}})}>
               <h2>{course.name}</h2>
+              <hr />
               <p>Professor Name: {course.professor_name}</p>
               <p>Course ID: {course.id}</p>
             </div>
