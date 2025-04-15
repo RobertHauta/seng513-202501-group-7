@@ -129,11 +129,12 @@ const getClassQuestGrades = async (request, response) => {
         classroommembers cm
       JOIN
         users u ON u.id = cm.user_id
-      LEFT JOIN StudentAnswers sa ON sa.student_id = cm.user_id AND sa.question_id = $2
+      LEFT JOIN StudentAnswers sa ON sa.student_id = cm.user_id AND sa.class_question_id = $2
       WHERE
         cm.classroom_id = $1 AND cm.role_id = 3
     `;
     const { rows } = await client.query(query, [classroomId, id]);
+    console.log(rows);
     rows.forEach(row => {
       if(row.is_correct === null || row.is_correct === undefined || isNaN(row.is_correct)){
         row.score = "Not Submitted";
