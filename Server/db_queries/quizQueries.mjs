@@ -201,141 +201,142 @@ const getQuestionsForQuiz = async (req, res) => {
   }
 };
 
-const getQuizClassList = async (req, res) => {
-  const { quizId, classroomId } = req.params;
-
-  if (!quizId) {
-    return res.status(400).json({ error: 'Quiz ID is required' });
-  }
-  if (!classroomId) {
-    return res.status(400).json({ error: 'Classroom ID is required' });
-  }
-  
-  const client = await postgresPool.connect();
-  try {
-    const queryText = `
-      SELECT u.id, u.name, g.score
-      FROM Users u
-      JOIN ClassroomMembers cm ON cm.user_id = u.id
-      LEFT JOIN Grades g ON g.student_id = u.id AND g.quiz_id = $1
-      WHERE u.role_id = 3 AND cm.classroom_id = $2
-    `;
-    const { rows } = await client.query(queryText, [quizId, classroomId]);
-    return res.status(200).json({ quizStudents: rows });
-  } catch (error) {
-    console.error('Error fetching students grades:', error);
-    return res.status(500).json({ error: 'Internal server error' });
-  } finally {
-    client.release();
-  }
-};
-
-const checkStudentSubmitted = async (req, res) => {
-  const { quizId, studentId } = req.params;
-
+const gradeQuiz = async (req, res) => {
+  const {quizId, studentId, answers} = req.body;
   if (!quizId) {
     return res.status(400).json({ error: 'Quiz ID is required' });
   }
   if (!studentId) {
     return res.status(400).json({ error: 'Student ID is required' });
   }
-  
+  if (!answers.length) {
+    return res.status(400).json({ error: 'Answers are required' });
+  }
   const client = await postgresPool.connect();
+
   try {
-    const queryText = `
-      SELECT count(*)
-      FROM Grades
-      WHERE quiz_id = $1 and student_id = $2
+    await client.query('BEGIN');
+    
+    let totMarks = 0;
+    let earnedMarks = 0;
+
+    for (const answer of answers) {
+      const {question_id, option_text, id, isMC} = answer;
+      if (!question_id) {
+        return res.status(400).json({ error: 'Question ID is required' });
+      }
+      if (!option_text &&!id) {
+        return res.status(400).json({ error: 'Answer text or option ID is required' });
+      }
+      if (isMC &&!id) {
+        return res.status(400).json({ error: 'MC answer option ID is required' });
+      }
+
+      let isCorrect = null;
+
+      if(isMC){
+        const correctAnswerQuery = `
+          SELECT is_correct
+          FROM Options
+          WHERE question_id = $1 AND id = $2
+          `;
+        const { rows } = await client.query(correctAnswerQuery, [question_id, id]);
+        isCorrect = rows[0] ? rows[0].is_correct : null;
+        if (isCorrect === null) {
+          return res.status(400).json({ error: 'Invalid option ID for the given question' });
+        }
+      }
+      else{
+        const correctAnswerQuery = `
+          SELECT correct_answer
+          FROM Questions
+          WHERE id = $1
+          `;
+        const { rows } = await client.query(correctAnswerQuery, [question_id]);
+        isCorrect = rows[0] ? rows[0].correct_answer === answer.option_text : null;
+        if (isCorrect === null) {
+          return res.status(400).json({ error: 'Invalid answer ID for the given question' });
+        }
+      }
+      totMarks++;
+      if (isCorrect) {
+        earnedMarks++;
+      }
+
+      const queryText = `
+        INSERT INTO StudentAnswers (question_id, student_id, selected_answer, is_correct, submitted_at)
+        VALUES ($1, $2, $3, $4, NOW())
+      `;
+      await client.query(queryText, [question_id, studentId, option_text, isCorrect]);
+    }
+
+    const gradeQuizQuery = `
+        INSERT INTO Grades (student_id, quiz_id, score)
+        VALUES ($1, $2, $3)
+        RETURNING score
+        `;
+    const { rows1: gradeRows } = await client.query(gradeQuizQuery, [studentId, quizId, earnedMarks/totMarks]);
+
+    await client.query('COMMIT');
+    return res.status(200).json({ grade: {earnedMarks, totMarks} });
+    } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error grading quiz:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    client.release();
+  }
+}
+
+const getQuestionOptions = async (req, res) => {
+  const { questionId } = req.params;
+  if (!questionId) {
+    return res.status(400).json({ error: 'Question ID is required' });
+  }
+  const client = await postgresPool.connect();
+
+  try{
+    const query = `
+      SELECT *
+      FROM Options
+      WHERE question_id = $1
     `;
-    const { rows } = await client.query(queryText, [quizId, studentId]);
-    const count = parseInt(rows[0].count, 10);
-    return res.status(200).json({ submittedQuiz: count > 0 });
+    const { rows } = await client.query(query, [questionId]);
+    return res.status(200).json({ options: rows });
   } catch (error) {
-    console.error('Error fetching if student has submitted:', error);
+    console.error('Error fetching question options:', error);
     return res.status(500).json({ error: 'Internal server error' });
   } finally {
     client.release();
   }
 };
 
-const getSubmittedQuiz = async (req, res) => {
-  const { quizId, studentId } = req.params;
-
-  if (!quizId) {
-    return res.status(400).json({ error: 'Quiz ID is required' });
-  }
+const getStudentAnswers = async (req, res) => {
+  const { studentId, questionId } = req.params;
   if (!studentId) {
     return res.status(400).json({ error: 'Student ID is required' });
   }
-  
   const client = await postgresPool.connect();
-  try {
-    const queryText = `
-      SELECT 
-        q.id AS question_id,
-        q.question_text,
-        q.marks,
-        q.correct_answer,
-        jsonb_agg(DISTINCT jsonb_build_object(
-          'option_id', o.id,
-          'option_text', o.option_text,
-          'is_correct', o.is_correct
-        )) FILTER (WHERE o.id IS NOT NULL) AS options,
-        jsonb_agg(DISTINCT sa.selected_answer) FILTER (WHERE sa.selected_answer IS NOT NULL) AS student_answers
-      FROM questions q
-      LEFT JOIN StudentAnswers sa 
-        ON sa.question_id = q.id AND sa.student_id = $2
-      LEFT JOIN Options o 
-        ON o.question_id = q.id
-      WHERE q.quiz_id = $1
-      GROUP BY q.id, q.question_text, q.marks, q.correct_answer
+
+  try{
+    const query = `
+      SELECT sa.question_id, sa.selected_answer, sa.is_correct, sa.submitted_at, q.question_text
+      FROM Questions q
+      JOIN StudentAnswers sa ON sa.question_id = q.id
+      WHERE sa.student_id = $1 AND sa.question_id = $2
     `;
-    const { rows } = await client.query(queryText, [quizId, studentId]);
-    return res.status(200).json({ submittedQuizQuestions: rows });
+    const { rows } = await client.query(query, [studentId, questionId]);
+
+    console.log('Student answers:', rows);
+
+    return res.status(200).json({ answers: rows });
   } catch (error) {
-    console.error('Error fetching students submitted quiz:', error);
+    console.error('Error fetching student answers:', error);
     return res.status(500).json({ error: 'Internal server error' });
   } finally {
     client.release();
   }
 };
-
-const getUnansweredQuiz = async (req, res) => {
-  const { quizId } = req.params;
-
-  if (!quizId) {
-    return res.status(400).json({ error: 'Quiz ID is required' });
-  }
-  
-  const client = await postgresPool.connect();
-  try {
-    const queryText = `
-      SELECT 
-        q.id AS question_id,
-        q.question_text,
-        q.marks,
-        q.correct_answer,
-        jsonb_agg(DISTINCT jsonb_build_object(
-          'option_id', o.id,
-          'option_text', o.option_text,
-          'is_correct', o.is_correct
-        )) FILTER (WHERE o.id IS NOT NULL) AS options
-      FROM questions q
-      LEFT JOIN Options o 
-        ON o.question_id = q.id
-      WHERE q.quiz_id = $1
-      GROUP BY q.id, q.question_text, q.marks, q.correct_answer
-    `;
-    const { rows } = await client.query(queryText, [quizId]);
-    return res.status(200).json({ quizQuestions: rows });
-  } catch (error) {
-    console.error('Error fetching quiz details (not submitted):', error);
-    return res.status(500).json({ error: 'Internal server error' });
-  } finally {
-    client.release();
-  }
-};
-
 
 const quizQueries = {
     getQuizzes,
@@ -343,10 +344,9 @@ const quizQueries = {
     createQuiz,
     createQuizQuestion,
     getQuestionsForQuiz,
-    getQuizClassList,
-    checkStudentSubmitted,
-    getSubmittedQuiz,
-    getUnansweredQuiz
+    gradeQuiz,
+    getQuestionOptions,
+    getStudentAnswers
 };
 
 export default quizQueries;

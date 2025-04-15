@@ -339,4 +339,3 @@ const classQueries = {
 };
 
 export default classQueries;
-
