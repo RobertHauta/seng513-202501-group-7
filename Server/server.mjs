@@ -207,15 +207,90 @@ app.get('/api/quiz/questions/:quizId', (req, res) => {
     queries.quiz.getQuestionsForQuiz(req, res);
 });
 
-app.post('/api/quiz/submit', (req, res) => {
-    //This is for submitting a quiz answer for a specific quiz
-    // Pass In: quiz_id, student_id, selected_answer for body
-    queries.quiz.gradeQuiz(req, res);
+//The next 3 apis should be called in order
+//Call the check submission first to see if the quiz has been submitted by the student first
+//It will return a boolean for if it was submitted or not
+app.get('/api/quiz/check-submission/:quizId/:studentId', (req, res) => {
+    queries.quiz.checkStudentSubmitted(req, res);
+});
+
+//If it was submitted, then use this api, it will recieve the a whole bunch of stuff, take a look at what is selected
+//it will basically retrieve the questions along with the options of the questions and also the submitted answers for the student for each question
+//Should work no matter what type of question it is like matching or true/false or written (hopefully)
+//Example output as below (I think)
+// {
+//     "submittedQuizQuestions": [
+//       {
+//         "question_id": 1,
+//         "question_text": "What is the capital of France?",
+//         "marks": 5,
+//         "correct_answer": "Paris",
+//         "options": [
+//           { "option_id": 1, "option_text": "Paris", "is_correct": true },
+//           { "option_id": 2, "option_text": "London", "is_correct": false },
+//           { "option_id": 3, "option_text": "Berlin", "is_correct": false }
+//         ],
+//         "student_answers": [ "Paris" ]
+//       },
+//       {
+//         "question_id": 2,
+//         "question_text": "Which is a fruit",
+//         "marks": 3,
+//         "correct_answer": "Orange, Apple",
+//         "options": [
+//           { "option_id": 4, "option_text": "Orange", "is_correct": true },
+//           { "option_id": 5, "option_text": "Apple", "is_correct": true }.
+//           { "option_id": 6, "option_text": "A shirt", "is_correct": false }
+//         ],
+//         "student_answers": [ "orange, apple" ]
+//       }
+//     ]
+// }
+// Careful about "correct_answer": "Orange, Apple", as that is from Questions.correct_answer, which just holds a string, for questions with multiple answers,
+// We need to make sure to input both answers. Same for the api below
+app.get('/api/quiz/submitted/:quizId/:studentId', (req, res) => {
+    queries.quiz.getSubmittedQuiz(req, res);
+});
+
+//If it was not submitted, we just get the questions and the options for the quiz, please check yourself to see what is selected
+// Example output as below (I think)
+// {
+//     "quizQuestions": [
+//       {
+//         "question_id": 1,
+//         "question_text": "What is the capital of France?",
+//         "marks": 5,
+//         "correct_answer": "Paris",
+//         "options": [
+//           { "option_id": 1, "option_text": "Paris", "is_correct": true },
+//           { "option_id": 2, "option_text": "London", "is_correct": false },
+//           { "option_id": 3, "option_text": "Berlin", "is_correct": false }
+//         ]
+//       },
+//       {
+//         "question_id": 2,
+//         "question_text": "What is 9 + 10?",
+//         "marks": 6,
+//         "correct_answer": "21",
+//         "options": [
+//           { "option_id": 4, "option_text": "19", "is_correct": false },
+//           { "option_id": 5, "option_text": "21", "is_correct": true }
+//         ]
+//       }
+//     ]
+// }
+app.get('/api/quiz/unansweredQuiz/:quizId', (req, res) => {
+    queries.quiz.getUnansweredQuiz(req, res);
 });
 
 
+app.get('/api/quiz/:quizId/:classroomId', (req, res) => {
+    // This is for when a professor or a TA clicks on a quiz, taking them to a page where they see a class list with the students scores
+    // Retrieves the students id as u.id, students name as u.name, and students grade as g.score (will be null if the quiz is not done)
+    // Pass In: quizId, classroomId
+    queries.quiz.getQuizClassList(req, res);
+});
 
-app.listen(5100, () => {
-    console.log('Server listening at http://localhost:5100');
-
+app.listen(5000, () => {
+    console.log('Server listening at http://localhost:5000');
 });
