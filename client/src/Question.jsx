@@ -7,31 +7,45 @@ function Question(props){
     const [activeOption, setActiveOption] = useState(null);
     const [studentAnswer, setStudentAnswer] = useState(null);
 
-    useEffect(() => { //Run on load
+    useEffect(() => {
         const fetchOptions = async () => {
-            console.log(props.isGrading)
-            if(props.isClassQuestion === true){
-                const response = await getOptionsQuestion(props.objectData.id);
-                setOptions(() => [...response.options]);
-            }else{
-                const response = await getOptionsQuiz(props.objectData.id);
-                setOptions(() => [...response.options]);
+            try {
+                let response;
+                if (props.isClassQuestion === true) {
+                    response = await getOptionsQuestion(props.objectData.id);
+                } else {
+                    response = await getOptionsQuiz(props.objectData.id);
+                }
+                setOptions(response.options);
+            } catch (error) {
+                console.error("Error fetching options:", error);
             }
-
-            if(props.isGrading === true && options.length > 0){
-                const response2 = props.isClassQuestion ? await getAnsweredStudentClassQuest(props.objectData.id, props.studentId) : await getAnsweredStudentQuiz(props.objectData.id, props.studentId);
-                const index = options.findIndex(option => option.option_text === response2.answers[0].selected_answer);
-                console.log(response2.answers[0]);
-                setStudentAnswer(index);
-            }
-            else if(props.isGrading === true && options.length === 0){
-                const response2 = props.isClassQuestion ? await getAnsweredStudentClassQuest(props.objectData.id, props.studentId) : await getAnsweredStudentQuiz(props.objectData.id, props.studentId);
-                const answer = response2.answers[0].selected_answer;
-                setStudentAnswer(answer);
-            }
-        }
+        };
         fetchOptions();
-    }, []);
+    }, [props.isClassQuestion, props.objectData.id]);
+    
+    useEffect(() => {
+        const handleGrading = async () => {
+            try {
+                if (props.isGrading === true) {
+                    const response2 = props.isClassQuestion
+                        ? await getAnsweredStudentClassQuest(props.objectData.id, props.studentId)
+                        : await getAnsweredStudentQuiz(props.objectData.id, props.studentId);
+    
+                    if (options.length > 0) {
+                        const index = options.findIndex(option => option.option_text === response2.answers[0].selected_answer);
+                        setStudentAnswer(index);
+                    } else {
+                        const answer = response2.answers[0].selected_answer;
+                        setStudentAnswer(answer);
+                    }
+                }
+            } catch (error) {
+                console.error("Error in handleGrading:", error);
+            }
+        };
+        handleGrading();
+    }, [props.isGrading, options, props.isClassQuestion, props.objectData.id, props.studentId]);
     
     return (
         <div className='container' style={{backgroundColor: '#5e5e5e'}}>
