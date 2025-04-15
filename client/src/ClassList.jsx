@@ -23,7 +23,15 @@ function ClassList(){
 
     return (
         <div>
-            <h1>{location.state.name} Class List</h1>
+            {location.state.headers[2] === null ? (
+                location.state.quizObject ? (
+                    <h1>{location.state.quizObject.title} Grades List</h1>
+                ) : (
+                    <h1>{location.state.classQuestion.name} Grades List</h1>
+                )
+            ) : (
+                <h1>{location.state.name} Class List</h1>
+            )}
             <div className="container">
                 <div style={{display: 'flex'}}>
                     <button type="button" style={{marginRight: 'auto'}} onClick={() => navigate('/CoursePage', {state: {name: location.state.name, id: location.state.id, user: location.state.user}})}>Return to Course</button>
