@@ -66,7 +66,7 @@ function CoursePage() {
               <button type="button" style={{marginRight: 'auto'}} onClick={() => navigate('/ClassList', {state: {name: location.state.name, id: location.state.id, user: location.state.user, headers: ['Name','E-Mail','Role']}})}>View Class List</button>
               <button onClick={() => navigate('/')}>Logout</button>
             </div>
-
+            <hr />
             <div className="tabs">
               <button onClick={() => setActiveTab('quizzes')}>Quizzes</button>
               <button onClick={() => setActiveTab('grades')}>Grades</button>

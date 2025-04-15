@@ -55,7 +55,11 @@ function QuizPage(){
 
     return (
         <div>
-            <h1>{location.state.quizObject.title}</h1>
+            {location.state.isGrading ? (
+                <h1>{location.state.student_name} - {location.state.quizObject.title}</h1>
+            ) : (
+                <h1>{location.state.quizObject.title}</h1>
+            )}
             <div className='container'>
                 <div style={{display: 'flex', marginBottom: "1em"}}>
                     <button type="button" style={{marginRight: 'auto'}} onClick={() => navigate('/CoursePage', {state: {name: location.state.name, id: location.state.id, user: location.state.user}})}>Return to Course Page</button>
@@ -64,7 +68,7 @@ function QuizPage(){
 
                 <div>
                     {questions.map((_, index) => (
-                            <Question objectData={questions[index]} questionIndex={index} isClassQuestion={false} isGrading={location.state.isGrading} key={index}
+                            <Question objectData={questions[index]} questionIndex={index} isClassQuestion={false} isGrading={location.state.isGrading} studentId={location.state.student_id} key={index}
                             onOptionSelect={(option, ind) => {
                                 setOptionsSelected((prev) => {
                                     const newOptions = [...prev];
@@ -76,8 +80,11 @@ function QuizPage(){
                             }}/>
                     ))}
                 </div>
-                    
-                <button onClick={handleSubmit}>Submit Quiz</button>
+                {location.state.isGrading ? (
+                    <button onClick={() => navigate('/ClassList', {state: {quizObject: location.state.quizObject, name: location.state.name, id: location.state.id, user: location.state.user, headers: ['Student Name','Achieved Grade', null]}})}>Return to Grades</button>
+                ) : (
+                    <button onClick={handleSubmit}>Submit Quiz</button>
+                )}
             </div>
         </div>
     )

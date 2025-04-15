@@ -81,7 +81,7 @@ button:focus-visible {
   color: black;
   cursor: pointer;
 }
-.optionsContainer > div:hover{
+.hoverOption:hover{
   border: 1px solid #646cff;
 }
 
@@ -155,6 +155,10 @@ body.popup-active {
 
 .quizzes h3:hover, .selectedOption{
   border: 1px solid #646cff;
+}
+
+.correctOption{
+  border: 3px solid green;
 }
 
 table {

@@ -97,6 +97,13 @@ app.get('/api/classrooms/grades/:classroomId/:userId', (req, res) => {
     queries.users.getStudentGrades(req, res);
 });
 
+app.get('/api/classrooms/classlist/grades/:classroomId/:pageType/:id', (req, res) => {
+    //This is for getting the classlist for a specific classroom
+    // Retrieves * from users
+    // Pass in: classroomId, pageType (quiz or class question), id (quiz or class question id)
+    queries.classes.getClassroomGrades(req, res);
+});
+
 app.get('/api/classrooms/average/:classroomId', (req, res) => {
     //This is for getting the average grade for a specific classroom
     // Retrieves * from grades
@@ -124,7 +131,18 @@ app.get('/api/classquestions/submit/:questionId/:selectedOption/:studentId', (re
     queries.classroomQuestions.validateCorrectAnswer(req, res);
 });
 
+app.get('/api/classquestions/answer/:studentId/:questionId', (req, res) => {
+    //This is for getting the answer for a specific question for a specific student
+    // Retrieves * from answers
+    // Pass in: studentId, questionId
+    queries.classroomQuestions.getStudentAnswer(req, res);
+});
 
+app.post('/api/assignments/update', (req, res) => {
+    //This is for updating assignment details
+    //Pass in: assignment_id, title, due_date for body
+    queries.classes.editStudentGrade(req, res);
+});
 
 //Quiz endpoints
 app.post('/api/quiz/create', (req, res) => {
@@ -161,6 +179,13 @@ app.get('/api/quizzes/unfinished/:classroomId/:studentId', (req, res) => {
     //Pass In: classroomId, studentId
     //Gets all the quizzes for that classroom that have questions that the student has not finished
     queries.quiz.getUnfinishedQuizzesForStudent(req, res);
+});
+
+app.get('/api/quiz/question/student/:studentId/:questionId', (req, res) => {
+    //This is for displaying on the quiz page for a student. 
+    //Pass In: studentId, questionId
+    //Gets the question details for a specific student in a specific quiz
+    queries.quiz.getStudentAnswers(req, res);
 });
 
 app.get('/api/quiz/questions/:quizId', (req, res) => {

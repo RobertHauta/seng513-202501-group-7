@@ -311,6 +311,32 @@ const getQuestionOptions = async (req, res) => {
   }
 };
 
+const getStudentAnswers = async (req, res) => {
+  const { studentId, questionId } = req.params;
+  if (!studentId) {
+    return res.status(400).json({ error: 'Student ID is required' });
+  }
+  const client = await postgresPool.connect();
+
+  try{
+    const query = `
+      SELECT sa.question_id, sa.selected_answer, sa.is_correct, sa.submitted_at, q.question_text
+      FROM Questions q
+      JOIN StudentAnswers sa ON sa.question_id = q.id
+      WHERE sa.student_id = $1 AND sa.question_id = $2
+    `;
+    const { rows } = await client.query(query, [studentId, questionId]);
+
+    console.log('Student answers:', rows);
+
+    return res.status(200).json({ answers: rows });
+  } catch (error) {
+    console.error('Error fetching student answers:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    client.release();
+  }
+};
 
 const quizQueries = {
     getQuizzes,
@@ -319,7 +345,8 @@ const quizQueries = {
     createQuizQuestion,
     getQuestionsForQuiz,
     gradeQuiz,
-    getQuestionOptions
+    getQuestionOptions,
+    getStudentAnswers
 };
 
 export default quizQueries;

@@ -11,7 +11,9 @@ function QuestionPage(){
     const navigate = useNavigate();
     const location = useLocation();
 
-    function handleSubmit(){
+    async function handleSubmit(){
+        if(optionSelected === null){ return alert("Please answer the question before submitting."); }
+
         const submitAnswer = async () => {
             try {
                 const response = await getCorrectAnswerClassQuestion(location, optionSelected, location.state.user.user_id);
@@ -19,26 +21,34 @@ function QuestionPage(){
                 console.error('Error:', error);
             }
         }
-        submitAnswer();
+        await submitAnswer();
 
         navigate('/CoursePage', {state: {name: location.state.name, id: location.state.id, user: location.state.user}});
     }
 
     return (
         <div>
-            <h1>{location.state.classQuestion.name}</h1>
+            {location.state.isGrading ? (
+                <h1>{location.state.student_name} - {location.state.classQuestion.name}</h1>
+            ) : (
+                <h1>{location.state.classQuestion.name}</h1>
+            )}
             <div className='container'>
                 <div style={{display: 'flex', marginBottom: "1em"}}>
                     <button type="button" style={{marginRight: 'auto'}} onClick={() => navigate('/CoursePage', {state: {name: location.state.name, id: location.state.id, user: location.state.user}})}>Return to Course Page</button>
                     <button onClick={() => navigate('/')}>Logout</button>
                 </div>
 
-                <Question objectData={location.state.classQuestion} student_id={location.state.user.user_id} isClassQuestion={true} isGrading={location.state.isGrading} 
+                <Question objectData={location.state.classQuestion} student_id={location.state.user.user_id} isClassQuestion={true} isGrading={location.state.isGrading} studentId={location.state.student_id}
                 onOptionSelect={(option)=> {
                     setOptionSelected(option);
                 }}/>
 
-                <button onClick={handleSubmit}>Submit Question</button>
+                {location.state.isGrading ? (
+                    <button onClick={() => navigate('/ClassList', {state: {classQuestion: location.state.classQuestion, name: location.state.name, id: location.state.id, user: location.state.user, headers: ['Student Name','Achieved Grade', null]}})}>Return to Grades</button>
+                ) : (
+                    <button onClick={handleSubmit}>Submit Question</button>
+                )}
             </div>
         </div>
     )
