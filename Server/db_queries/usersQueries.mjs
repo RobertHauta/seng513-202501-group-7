@@ -307,14 +307,17 @@ const getClassGrades = async (request, response) => {
         totalScore += parseFloat(grade.score) * parseFloat(grade.weight);
         totalWeight += parseFloat(grade.weight);
       });
+      if(item.scores.length < studentCount && item.scores.length > 0){
+        totalWeight += (studentCount - item.scores.length) * item.scores[0].weight;
+      }
       if (totalWeight === 0 || item.scores.length === 0) {
         return { name: item.name, average: '0%', weighted: '0/'+ item.scores[0].weight, count: 0 + "/" + studentCount };
       }
-      const finalGrade = (totalScore / totalWeight).toFixed(2) + '%';
+      const finalGrade = (totalScore * 100 / totalWeight).toFixed(2) + '%';
       if (finalGrade === 'NaN%') {
         return { name: item.name, average: '0%', weighted: '0/'+ item.scores[0].weight, count: 0 + "/" + studentCount };
       }
-      return { name: item.name, average: finalGrade, weighted: totalScore.toFixed(2) + "/" + totalWeight.toFixed(2), count: item.scores.length + "/" + studentCount };
+      return { name: item.name, average: finalGrade, weighted: (totalScore/studentCount).toFixed(2) + "/" + (totalWeight/studentCount).toFixed(2), count: item.scores.length + "/" + studentCount };
     });
 
     let averageGrade = 0;
