@@ -178,10 +178,21 @@ tr:nth-child(even) {
   background-color: #ffffff17;
 }
 
+.assignmentInfo{
+  display: flex;
+  justify-content: space-around;
+  margin-top: 1em;
+}
+
 @media (max-width: 768px){
   .gridContainer{
     display: flex;
     flex-direction: column;
+  }
+
+  .assignmentInfo{
+    flex-direction: column;
+    margin-left: 1em;
   }
 
   h1{

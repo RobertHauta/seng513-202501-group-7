@@ -92,7 +92,7 @@ function MakeAssignment(){
                     <button style={{marginRight: "auto"}} onClick={() => navigate('/CoursePage', {state: {name: location.state.name, id: location.state.id, user: location.state.user}})}>Return to Course</button>
                     <button onClick={() => navigate('/')}>Log Out</button>
                 </div>
-                <div style={{display: "flex", justifyContent: "space-around", marginTop: "1em"}}>
+                <div className="assignmentInfo">
                     <div>
                         <label>Release Date:</label>
                         <input id="rel" type="date"></input>
