@@ -21,7 +21,6 @@ function CoursePage() {
         let response_quiz = location.state.user.role_name === "Student" ? await getQuizzesStudents(location.state.id, location.state.user.user_id) : await getQuizzes(location.state.id);
         if([1,2,3].includes(response_quiz)) return;
         setQuizzes(() => [...response_quiz.quizzes]);
-        //TO DO: Fetch grades and update grades state
       }
       const fetchQuestions = async () => {
         let response_questions = location.state.user.role_name === "Student" ? await getClassQuestionsStudents(location.state.id, location.state.user.user_id) : await getClassQuestions(location.state.id);
@@ -96,9 +95,9 @@ function CoursePage() {
               <div className='container' style={{backgroundColor: '#5e5e5e'}}>
                 <div className='card' style={{backgroundColor: '#1a1a1a', width: 'fit-content', height: 'fit-content', border: 0}}>
                   {location.state.user.role_name === "Student" ? (
-                    <p style={{margin: '0'}}>Total Grade: {}</p>
+                    <p style={{margin: '0'}}>Total Grade: {totalGrade}</p>
                   ) : (
-                    <p style={{margin: '0'}}>Average Course Grade: {}</p>
+                    <p style={{margin: '0'}}>Average Course Grade: {totalGrade}</p>
                   )}
                 </div>
                 <h2>Grades</h2>
@@ -123,12 +122,19 @@ function CoursePage() {
                     {location.state.user.role_name === "Student" ? 
                       grades.map(grade => (
                         <tr>
-                          <th>{grade.name}</th>
-                          <th>{grade.score}</th>
-                          <th>{grade.weight}</th>
+                          <td>{grade.name}</td>
+                          <td>{grade.score}</td>
+                          <td>{grade.weight}</td>
                         </tr>
-                      )) : (
-                        null//TO DO: Add professor view of grades
+                      )) : 
+                        grades.map(grade => (
+                          <tr>
+                            <td>{grade.name}</td>
+                            <td>{grade.average}</td>
+                            <td>{grade.weighted}</td>
+                            <td>{grade.count}</td>
+                          </tr>
+                        )
                       )}
                   </tbody>
                 </table>

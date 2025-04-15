@@ -227,17 +227,18 @@ const getStudentGrades = async (request, response) => {
 
   try {
     const query = `
-      SELECT grades.score as score, quizzes.title as name, quizzes.total_weight as weight
-      FROM grades
-      JOIN quizzes ON quizzes.id = grades.quiz_id
-      WHERE grades.student_id = $1 AND quizzes.classroom_id = $2 
+      SELECT quizzes.id as quiz_id, quizzes.title as name, quizzes.total_weight as weight,
+           grades.score as score
+      FROM quizzes
+      LEFT JOIN grades ON quizzes.id = grades.quiz_id AND grades.student_id = $1
+      WHERE quizzes.classroom_id = $2
     `;
     const { rows } = await client.query(query, [userId, classroomId]);
     let result = rows.map(row => {
       return {
-        score: (row.score * 100).toFixed(2) + '%',
+        score: row.score ? (row.score * 100).toFixed(2) + '%' : "0%",
         name: row.name,
-        weight: (row.weight * row.score).toFixed(2) + "/" + row.weight
+        weight: row.score ? (row.weight * row.score).toFixed(2) + "/" + row.weight : "0/" + row.weight
       };
     });
     let finalGrade = 0;
@@ -270,25 +271,67 @@ const getClassGrades = async (request, response) => {
     const query = `
       SELECT grades.score as score, quizzes.title as name, quizzes.total_weight as weight
       FROM quizzes
-      JOIN grades ON quizzes.id = grades.quiz_id
+      LEFT JOIN grades ON quizzes.id = grades.quiz_id
       WHERE quizzes.classroom_id = $1 
     `;
     const { rows } = await client.query(query, [classroomId]);
     
+    const studentQuery = `
+      SELECT COUNT(DISTINCT u.id) as count
+      FROM users u
+      JOIN classroommembers cm ON u.id = cm.user_id
+      WHERE u.role_id = 3 AND cm.classroom_id = $1
+    `;
+    const { rows: studentCountRows } = await client.query(studentQuery, [classroomId]);
+    const studentCount = studentCountRows[0].count;
+    if (studentCount === 0) {
+      response.status(400).json({ error: 'No students found in this classroom' });
+      return;
+    }
+
     const grouped = rows.reduce((acc, cur) => {
       if (!acc[cur.name]) {
         acc[cur.name] = { name: cur.name, scores: [] };
       }
       acc[cur.name].scores.push({
-        score: (cur.score * 100).toFixed(2) + '%',
-        weight: (cur.weight * cur.score).toFixed(2) + "/" + cur.weight
+        score: cur.score,
+        weight: cur.weight
       });
       return acc;
     }, []);
+    
+    const averaged = Object.values(grouped).map(item => {
+      let totalScore = 0;
+      let totalWeight = 0;
+      item.scores.forEach(grade => {
+        totalScore += parseFloat(grade.score) * parseFloat(grade.weight);
+        totalWeight += parseFloat(grade.weight);
+      });
+      if (totalWeight === 0 || item.scores.length === 0) {
+        return { name: item.name, average: '0%', weighted: '0/'+ item.scores[0].weight, count: 0 + "/" + studentCount };
+      }
+      const finalGrade = (totalScore / totalWeight).toFixed(2) + '%';
+      if (finalGrade === 'NaN%') {
+        return { name: item.name, average: '0%', weighted: '0/'+ item.scores[0].weight, count: 0 + "/" + studentCount };
+      }
+      return { name: item.name, average: finalGrade, weighted: totalScore.toFixed(2) + "/" + totalWeight.toFixed(2), count: item.scores.length + "/" + studentCount };
+    });
 
-    console.log(averaged);
+    let averageGrade = 0;
+    let totalWeight = 0;
+    averaged.forEach(grade => {
+      totalWeight += parseFloat(grade.weighted.split("/")[1]);
+      averageGrade += parseFloat(grade.weighted.split("/")[0]);
+    });
+    averageGrade = (averageGrade / totalWeight * 100).toFixed(2) + '%';
+    if (averageGrade === 'NaN%') {
+      averageGrade = '0%';
+    }
+    if (totalWeight === 0) {
+      averageGrade = '0%';
+    }
 
-    response.status(200).json({ grades: rows });
+    response.status(200).json({ grades: averaged, finalGrade: averageGrade });
   }catch (error) {
     console.error('Error fetching class grades:', error);
     response.status(500).json({ error: 'Internal server error' });
