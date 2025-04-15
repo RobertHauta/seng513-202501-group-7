@@ -10,15 +10,26 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-dotenv.config({
-    override: true,
-    path: path.join(__dirname, 'Environments/neon_dev.env')
-});
+try {
+    dotenv.config({
+        override: true,
+        path: path.join(__dirname, 'Environments/neon_dev.env')
+    });
+} catch (error) {
+    console.error('Error loading environment variables:', error);
+    process.exit(1);
+}
 
 // Enable CORS for all routes
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // Parses URL-encoded data
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send('Something broke!');
+});
 
 app.get('/api', (req, res) => {
     res.json({ "users": [{ "id": 1, "name": "John Doe" }, { "id": 2, "name": "Jane Doe" }] });
@@ -50,9 +61,14 @@ app.post('/api/classrooms/create', (req, res) => {
     queries.classes.createClassroom(req, res);
 });
 
-app.get('/api/classrooms', (req, res) => {
+app.get('/api/classrooms/:userId', (req, res) => {
     // This function should handle retrieving a user's classrooms.
-    queries.classes.getUserClassrooms(req, res);
+    queries.users.getUserClassrooms(req, res);
+});
+
+app.get('/api/classrooms/professors/:userId', (req, res) => {
+    // This function should handle retrieving a user's classrooms.
+    queries.users.getProfessorClassrooms(req, res);
 });
 
 app.post('/api/classrooms/add', (req, res) => {
@@ -68,7 +84,13 @@ app.post('/api/classrooms/add', (req, res) => {
 // ClassroomQuestions endpoints
 app.post('/api/classrooms/question', (req, res) => {
     queries.classroomQuestions.createClassroomQuestion(req, res);
+}); 
+
+
+app.get('/api/classrooms/classlist/:classroomId', (req, res) => {
+    queries.classes.getAllStudentsInClassroom(req, res);
 });
+
 
 app.get('/api/classrooms/question/:classroomId', (req, res) => {
     //This is for getting all classroom questions for a specific classroom (doesn't only get unfinished classroom questions)
@@ -79,6 +101,27 @@ app.get('/api/classrooms/question/:classroomId', (req, res) => {
     queries.classroomQuestions.getClassroomQuestions(req, res);
 });
 
+app.get('/api/classrooms/grades/:classroomId/:userId', (req, res) => {
+    //This is for getting the grades for a specific student in a specific classroom
+    // Retrieves * from grades
+    // Pass in: classroomId, studentId
+    queries.users.getStudentGrades(req, res);
+});
+
+app.get('/api/classrooms/classlist/grades/:classroomId/:pageType/:id', (req, res) => {
+    //This is for getting the classlist for a specific classroom
+    // Retrieves * from users
+    // Pass in: classroomId, pageType (quiz or class question), id (quiz or class question id)
+    queries.classes.getClassroomGrades(req, res);
+});
+
+app.get('/api/classrooms/average/:classroomId', (req, res) => {
+    //This is for getting the average grade for a specific classroom
+    // Retrieves * from grades
+    // Pass in: classroomId
+    queries.users.getClassGrades(req, res);
+});
+
 app.get('/api/classquestions/unfinished/:classroomId/:studentId', (req, res) => {
     //This is for displaying on classroom home page for a student. 
     //Gets all unfinished classroomQuestions for a specific student in a specific classroom
@@ -86,8 +129,31 @@ app.get('/api/classquestions/unfinished/:classroomId/:studentId', (req, res) => 
     queries.classroomQuestions.getUnfinishedClassQuestionsForStudent(req, res);
 });
 
+app.get('/api/classquestions/options/:questionId', (req, res) => {
+    //This is for getting all options for a specific question
+    // Retrieves * from options
+    // Pass in: questionId
+    queries.classroomQuestions.getQuestionOptions(req, res);
+});
 
+app.get('/api/classquestions/submit/:questionId/:selectedOption/:studentId', (req, res) => {
+    //This is for submitting a question answer for a specific question
+    // Pass in: questionId, selectedOptionId, studentId
+    queries.classroomQuestions.validateCorrectAnswer(req, res);
+});
 
+app.get('/api/classquestions/answer/:studentId/:questionId', (req, res) => {
+    //This is for getting the answer for a specific question for a specific student
+    // Retrieves * from answers
+    // Pass in: studentId, questionId
+    queries.classroomQuestions.getStudentAnswer(req, res);
+});
+
+app.post('/api/assignments/update', (req, res) => {
+    //This is for updating assignment details
+    //Pass in: assignment_id, title, due_date for body
+    queries.classes.editStudentGrade(req, res);
+});
 
 //Quiz endpoints
 app.post('/api/quiz/create', (req, res) => {
@@ -97,6 +163,12 @@ app.post('/api/quiz/create', (req, res) => {
     queries.quiz.createQuiz(req, res);
 });
 
+app.get('/api/quiz/question/options/:questionId', (req, res) => {
+    //This is for getting all options for a specific question
+    // Retrieves * from options
+    // Pass in: questionId
+    queries.quiz.getQuestionOptions(req, res);
+});
 
 app.post('/api/quiz/question/create', (req, res) => {
     //Creates a question for a quiz, doesn't work for class questions since that is in a different table. 
@@ -120,6 +192,13 @@ app.get('/api/quizzes/unfinished/:classroomId/:studentId', (req, res) => {
     queries.quiz.getUnfinishedQuizzesForStudent(req, res);
 });
 
+app.get('/api/quiz/question/student/:studentId/:questionId', (req, res) => {
+    //This is for displaying on the quiz page for a student. 
+    //Pass In: studentId, questionId
+    //Gets the question details for a specific student in a specific quiz
+    queries.quiz.getStudentAnswers(req, res);
+});
+
 app.get('/api/quiz/questions/:quizId', (req, res) => {
     // This is for the quiz page to display questions. Only for unfinished questions
     // Retrieves * from Questions that are associated with a specific quiz id.
@@ -128,6 +207,15 @@ app.get('/api/quiz/questions/:quizId', (req, res) => {
     queries.quiz.getQuestionsForQuiz(req, res);
 });
 
-app.listen(5000, () => {
-    console.log('Server listening at http://localhost:5000');
+app.post('/api/quiz/submit', (req, res) => {
+    //This is for submitting a quiz answer for a specific quiz
+    // Pass In: quiz_id, student_id, selected_answer for body
+    queries.quiz.gradeQuiz(req, res);
+});
+
+
+
+app.listen(5100, () => {
+    console.log('Server listening at http://localhost:5100');
+
 });

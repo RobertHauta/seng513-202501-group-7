@@ -122,8 +122,9 @@ const deleteUserByEmail = async (request, response) => {
 
 // Function to retrieve classrooms for a given user ID (from query parameters)
 const getUserClassrooms = async (request, response) => {
-    const userId = request.query.userId; 
-  
+    const userId = request.params.userId; 
+    console.log(request.params);
+    console.log(`Getting classrooms for user ID: ${userId}`);
     if (!userId) {
       response.status(400).json({ error: 'User ID is required' });
       return;
@@ -132,12 +133,43 @@ const getUserClassrooms = async (request, response) => {
     const client = await postgresPool.connect();
     try {
       const query = `
-        SELECT cm.role_id, c.name AS classroom_name
+        SELECT cm.user_id, c.professor_id AS professor_id, c.name AS name, u.name AS professor_name, c.id as id
         FROM classroommembers cm
         JOIN classrooms c ON c.id = cm.classroom_id
+        JOIN users u ON u.id = c.professor_id
         WHERE cm.user_id = $1
       `;
       const { rows } = await client.query(query, [userId]);
+      console.log('Retrieved classrooms:', rows);
+      response.json({ classrooms: rows });
+    } catch (error) {
+      console.error('Error fetching classrooms:', error);
+      response.status(500).json({ error: 'Internal server error' });
+    } finally {
+      client.release();
+    }
+};
+
+// Function to retrieve classrooms for a given user ID (from query parameters)
+const getProfessorClassrooms = async (request, response) => {
+    const userId = request.params.userId; 
+    console.log(request.params);
+    console.log(`Getting classrooms for user ID: ${userId}`);
+    if (!userId) {
+      response.status(400).json({ error: 'User ID is required' });
+      return;
+    }
+  
+    const client = await postgresPool.connect();
+    try {
+      const query = `
+        SELECT classrooms.id AS id, classrooms.name AS name, professor_id, u.name AS professor_name
+        FROM classrooms
+        JOIN users u ON u.id = classrooms.professor_id
+        WHERE professor_id = $1
+      `;
+      const { rows } = await client.query(query, [userId]);
+      console.log('Retrieved classrooms:', rows);
       response.json({ classrooms: rows });
     } catch (error) {
       console.error('Error fetching classrooms:', error);
@@ -183,12 +215,143 @@ const verifyUserRole = async (req, res) => {
     }
 };
 
+const getStudentGrades = async (request, response) => {
+  const userId = request.params.userId;
+  const classroomId = request.params.classroomId;
+
+  if (!userId ||!classroomId) {
+    response.status(400).json({ error: 'User ID and classroom ID are required' });
+    return;
+  }
+  const client = await postgresPool.connect();
+
+  try {
+    const query = `
+      SELECT quizzes.id as quiz_id, quizzes.title as name, quizzes.total_weight as weight,
+           grades.score as score
+      FROM quizzes
+      LEFT JOIN grades ON quizzes.id = grades.quiz_id AND grades.student_id = $1
+      WHERE quizzes.classroom_id = $2
+    `;
+    const { rows } = await client.query(query, [userId, classroomId]);
+    let result = rows.map(row => {
+      return {
+        score: row.score ? (row.score * 100).toFixed(2) + '%' : "0%",
+        name: row.name,
+        weight: row.score ? (row.weight * row.score).toFixed(2) + "/" + row.weight : "0/" + row.weight
+      };
+    });
+    let finalGrade = 0;
+    let totalWeight = 0;
+    let scoredweight = 0;
+    rows.forEach(grade=>{
+      scoredweight += grade.score * grade.weight;
+      totalWeight += grade.weight;
+    });
+    finalGrade = (scoredweight / totalWeight * 100).toFixed(2) + '%';
+
+    response.status(200).json({ grades: result, finalGrade: finalGrade });
+  } catch (error) {
+    console.error('Error fetching student grades:', error);
+    response.status(500).json({ error: 'Internal server error' });
+  } finally {
+    client.release();
+  }
+};
+
+const getClassGrades = async (request, response) => {
+  const classroomId = request.params.classroomId;
+
+  if (!classroomId) {
+    response.status(400).json({ error: 'Classroom ID is required' });
+    return;
+  }
+  const client = await postgresPool.connect();
+  try {
+    const query = `
+      SELECT grades.score as score, quizzes.title as name, quizzes.total_weight as weight
+      FROM quizzes
+      LEFT JOIN grades ON quizzes.id = grades.quiz_id
+      WHERE quizzes.classroom_id = $1 
+    `;
+    const { rows } = await client.query(query, [classroomId]);
+    
+    const studentQuery = `
+      SELECT COUNT(DISTINCT u.id) as count
+      FROM users u
+      JOIN classroommembers cm ON u.id = cm.user_id
+      WHERE u.role_id = 3 AND cm.classroom_id = $1
+    `;
+    const { rows: studentCountRows } = await client.query(studentQuery, [classroomId]);
+    const studentCount = studentCountRows[0].count;
+    if (studentCount === 0) {
+      response.status(400).json({ error: 'No students found in this classroom' });
+      return;
+    }
+
+    const grouped = rows.reduce((acc, cur) => {
+      if (!acc[cur.name]) {
+        acc[cur.name] = { name: cur.name, scores: [] };
+      }
+      acc[cur.name].scores.push({
+        score: cur.score,
+        weight: cur.weight
+      });
+      return acc;
+    }, []);
+    
+    const averaged = Object.values(grouped).map(item => {
+      let totalScore = 0;
+      let totalWeight = 0;
+      item.scores.forEach(grade => {
+        totalScore += parseFloat(grade.score) * parseFloat(grade.weight);
+        totalWeight += parseFloat(grade.weight);
+      });
+      if(item.scores.length < studentCount && item.scores.length > 0){
+        totalWeight += (studentCount - item.scores.length) * item.scores[0].weight;
+      }
+      if (totalWeight === 0 || item.scores.length === 0) {
+        return { name: item.name, average: '0%', weighted: '0/'+ item.scores[0].weight, count: 0 + "/" + studentCount };
+      }
+      const finalGrade = (totalScore * 100 / totalWeight).toFixed(2) + '%';
+      if (finalGrade === 'NaN%') {
+        return { name: item.name, average: '0%', weighted: '0/'+ item.scores[0].weight, count: 0 + "/" + studentCount };
+      }
+      return { name: item.name, average: finalGrade, weighted: (totalScore/studentCount).toFixed(2) + "/" + (totalWeight/studentCount).toFixed(2), count: item.scores.length + "/" + studentCount };
+    });
+
+    let averageGrade = 0;
+    let totalWeight = 0;
+    averaged.forEach(grade => {
+      totalWeight += parseFloat(grade.weighted.split("/")[1]);
+      averageGrade += parseFloat(grade.weighted.split("/")[0]);
+    });
+    averageGrade = (averageGrade / totalWeight * 100).toFixed(2) + '%';
+    if (averageGrade === 'NaN%') {
+      averageGrade = '0%';
+    }
+    if (totalWeight === 0) {
+      averageGrade = '0%';
+    }
+
+    response.status(200).json({ grades: averaged, finalGrade: averageGrade });
+  }catch (error) {
+    console.error('Error fetching class grades:', error);
+    response.status(500).json({ error: 'Internal server error' });
+  } finally {
+    client.release();
+  }
+};
+
 const userQueries = {
     getUserByNamePass,
     createNewUser,
     deleteUserByEmail,
     getUserClassrooms,
-    verifyUserRole
+    verifyUserRole,
+    getProfessorClassrooms,
+    getStudentGrades,
+    getClassGrades
 };
 
 export default userQueries;

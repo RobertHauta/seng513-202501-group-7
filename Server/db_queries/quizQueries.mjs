@@ -19,54 +19,62 @@ const postgresPool = new Pool({
 });
 
 const createQuiz = async (req, res) => {
-    const { title,
-      classroom_id,
-      created_by,
-      total_weight,
-      release_date,
-      due_date 
-    } = req.body;
-  
-    if (!title) {
-      return res.status(400).json({ error: 'Title is required' });
-    }
-    if (!classroom_id) {
-      return res.status(400).json({ error: 'classroom_id is required' });
-    }
-    if (!created_by) {
-      return res.status(400).json({ error: 'created_by is required' });
-    }
-    if (!due_date) {
-      return res.status(400).json({ error: 'due_date is required' });
-    }
-  
-    // Use total_weight or default to 0.0
-    const effectiveTotalWeight = total_weight ?? 0.0;
-    // Use release_date or default to current date/time in ISO format
-    const effectiveReleaseDate = release_date || new Date().toISOString();
-  
-    const client = await postgresPool.connect();
-    try {
-      const query = `
-        INSERT INTO Quizzes (title, classroom_id, created_by, total_weight, release_date, due_date)
-        VALUES ($1, $2, $3, $4, $5, $6)
-        RETURNING *
+  const { title, classroom_id, created_by, total_weight, release_date, due_date, questions } = req.body;
+
+  const client = await postgresPool.connect();
+  try {
+    // Start a transaction
+    await client.query('BEGIN');
+
+    // Insert the quiz
+    const quizQuery = `
+      INSERT INTO Quizzes (title, classroom_id, created_by, total_weight, release_date, due_date)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING id
+    `;
+    const quizResult = await client.query(quizQuery, [title, classroom_id, created_by, total_weight, release_date, due_date]);
+    const quizId = quizResult.rows[0].id;
+
+    // Insert questions and options
+    for (const question of questions) {
+      // Insert question
+      const questionQuery = `
+        INSERT INTO Questions (quiz_id, question_text, type_id, marks, correct_answer)
+        VALUES ($1, $2, $3, $4, $5)
+        RETURNING id
       `;
-      const { rows } = await client.query(query, [
-        title,
-        classroom_id,
-        created_by,
-        effectiveTotalWeight,
-        effectiveReleaseDate,
-        due_date
+      const questionResult = await client.query(questionQuery, [
+        quizId,
+        question.question_text,
+        question.type_id,
+        question.marks,
+        question.correct_answer
       ]);
-      return res.status(201).json({ quiz: rows[0] });
-    } catch (error) {
-      console.error('Error creating quiz:', error);
-      return res.status(500).json({ error: 'Internal server error' });
-    } finally {
-      client.release();
+      const questionId = questionResult.rows[0].id;
+
+      // Insert options if they exist
+      if (question.options && question.options.length > 0) {
+        const optionQuery = `
+          INSERT INTO Options (question_id, option_text, is_correct)
+          VALUES ($1, $2, $3)
+        `;
+        for (const option of question.options) {
+          await client.query(optionQuery, [questionId, option.option_text, option.is_correct]);
+        }
+      }
     }
+
+    // Commit the transaction
+    await client.query('COMMIT');
+
+    res.json({ message: 'Quiz created successfully', quizId });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error creating quiz:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    client.release();
+  }
 };
 
 // Function to get quizzes
@@ -85,7 +93,8 @@ const getQuizzes = async (req, res) => {
         WHERE classroom_id = $1
       `;
       const { rows } = await client.query(query, [classroomId]);
-      return res.status(200).json({ quizzes: rows });
+      console.log(rows);
+      return res.json({ quizzes: rows });
     } catch (error) {
       console.error('Error fetching quizzes:', error);
       return res.status(500).json({ error: 'Internal server error' });
@@ -192,13 +201,152 @@ const getQuestionsForQuiz = async (req, res) => {
   }
 };
 
+const gradeQuiz = async (req, res) => {
+  const {quizId, studentId, answers} = req.body;
+  if (!quizId) {
+    return res.status(400).json({ error: 'Quiz ID is required' });
+  }
+  if (!studentId) {
+    return res.status(400).json({ error: 'Student ID is required' });
+  }
+  if (!answers.length) {
+    return res.status(400).json({ error: 'Answers are required' });
+  }
+  const client = await postgresPool.connect();
+
+  try {
+    await client.query('BEGIN');
+    
+    let totMarks = 0;
+    let earnedMarks = 0;
+
+    for (const answer of answers) {
+      const {question_id, option_text, id, isMC} = answer;
+      if (!question_id) {
+        return res.status(400).json({ error: 'Question ID is required' });
+      }
+      if (!option_text &&!id) {
+        return res.status(400).json({ error: 'Answer text or option ID is required' });
+      }
+      if (isMC &&!id) {
+        return res.status(400).json({ error: 'MC answer option ID is required' });
+      }
+
+      let isCorrect = null;
+
+      if(isMC){
+        const correctAnswerQuery = `
+          SELECT is_correct
+          FROM Options
+          WHERE question_id = $1 AND id = $2
+          `;
+        const { rows } = await client.query(correctAnswerQuery, [question_id, id]);
+        isCorrect = rows[0] ? rows[0].is_correct : null;
+        if (isCorrect === null) {
+          return res.status(400).json({ error: 'Invalid option ID for the given question' });
+        }
+      }
+      else{
+        const correctAnswerQuery = `
+          SELECT correct_answer
+          FROM Questions
+          WHERE id = $1
+          `;
+        const { rows } = await client.query(correctAnswerQuery, [question_id]);
+        isCorrect = rows[0] ? rows[0].correct_answer === answer.option_text : null;
+        if (isCorrect === null) {
+          return res.status(400).json({ error: 'Invalid answer ID for the given question' });
+        }
+      }
+      totMarks++;
+      if (isCorrect) {
+        earnedMarks++;
+      }
+
+      const queryText = `
+        INSERT INTO StudentAnswers (question_id, student_id, selected_answer, is_correct, submitted_at)
+        VALUES ($1, $2, $3, $4, NOW())
+      `;
+      await client.query(queryText, [question_id, studentId, option_text, isCorrect]);
+    }
+
+    const gradeQuizQuery = `
+        INSERT INTO Grades (student_id, quiz_id, score)
+        VALUES ($1, $2, $3)
+        RETURNING score
+        `;
+    const { rows1: gradeRows } = await client.query(gradeQuizQuery, [studentId, quizId, earnedMarks/totMarks]);
+
+    await client.query('COMMIT');
+    return res.status(200).json({ grade: {earnedMarks, totMarks} });
+    } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error grading quiz:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    client.release();
+  }
+}
+
+const getQuestionOptions = async (req, res) => {
+  const { questionId } = req.params;
+  if (!questionId) {
+    return res.status(400).json({ error: 'Question ID is required' });
+  }
+  const client = await postgresPool.connect();
+
+  try{
+    const query = `
+      SELECT *
+      FROM Options
+      WHERE question_id = $1
+    `;
+    const { rows } = await client.query(query, [questionId]);
+    return res.status(200).json({ options: rows });
+  } catch (error) {
+    console.error('Error fetching question options:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    client.release();
+  }
+};
+
+const getStudentAnswers = async (req, res) => {
+  const { studentId, questionId } = req.params;
+  if (!studentId) {
+    return res.status(400).json({ error: 'Student ID is required' });
+  }
+  const client = await postgresPool.connect();
+
+  try{
+    const query = `
+      SELECT sa.question_id, sa.selected_answer, sa.is_correct, sa.submitted_at, q.question_text
+      FROM Questions q
+      JOIN StudentAnswers sa ON sa.question_id = q.id
+      WHERE sa.student_id = $1 AND sa.question_id = $2
+    `;
+    const { rows } = await client.query(query, [studentId, questionId]);
+
+    console.log('Student answers:', rows);
+
+    return res.status(200).json({ answers: rows });
+  } catch (error) {
+    console.error('Error fetching student answers:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    client.release();
+  }
+};
 
 const quizQueries = {
     getQuizzes,
     getUnfinishedQuizzesForStudent,
     createQuiz,
     createQuizQuestion,
-    getQuestionsForQuiz
+    getQuestionsForQuiz,
+    gradeQuiz,
+    getQuestionOptions,
+    getStudentAnswers
 };
 
 export default quizQueries;
