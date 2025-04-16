@@ -106,7 +106,7 @@ function MakeAssignment(){
                         <input id='weight' type="number"></input>
                     </div>
                     <div>
-                        <label>Assignment Name</label>
+                        <label>Assignment Name:</label>
                         <input id='assName' type="text"></input>
                     </div>
                 </div>
@@ -115,7 +115,7 @@ function MakeAssignment(){
                         <div>
                             {questions.map((_, index) => (
                                 <div key={index} className='container' style={{backgroundColor: '#5e5e5e'}}>
-                                    <button onClick={handleRemove}>Delete</button>
+                                    <button style={{marginBottom: "1em"}} onClick={handleRemove}>Delete</button>
                                     <QuestionForm ref={(el) => (formRefs.current[index] = el)} />
                                 </div>
                             ))}

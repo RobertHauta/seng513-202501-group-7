@@ -34,6 +34,18 @@ function LoginForm(props) {
           </div>
         </form>
       </div>
+      <div className='container' style={{textAlign: 'center', width:'fit-content'}}>
+        <h2>About Us</h2>
+        <br />
+        <p>Fedora is commited to making learning easier through 3 simple steps:</p>
+        <div style={{ display: 'flex', justifyContent: 'center', textAlign: 'left'}}>
+          <ul>
+            <li>Connecting students and instructors across distances</li>
+            <li>Increasing classroom engagement</li>
+            <li>Building a foundation for students to learn better</li>
+          </ul>
+        </div>
+      </div>
     </div>
   );
 }
@@ -59,6 +71,7 @@ async function getUser(email, password) {
       
       if (!response.ok) {
         console.error('Server error:', response.statusText);
+        alert("Invalid email or password. Please try again.");
         reject(2);
       }
       console.log('Login successful');

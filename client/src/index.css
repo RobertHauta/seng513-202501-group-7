@@ -110,11 +110,12 @@ input:not([type="radio"]):focus {
 
 .classes{
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   flex-wrap: wrap;
 }
 
 .card{
+  min-width: 250px;
   width: 15%; 
   height: 15%;
   background-color: #5e5e5e;
@@ -149,6 +150,10 @@ input:not([type="radio"]):focus {
 }
 
 .popup-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
   background-color: rgb(85, 85, 85);
   padding: 20px;
   border-radius: 5px;
@@ -199,6 +204,13 @@ tr:nth-child(even) {
   display: flex;
   justify-content: space-around;
   margin-top: 1em;
+  margin-left: 4em;
+}
+
+.quizTableEdit{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 @media (max-width: 1200px){
@@ -206,10 +218,39 @@ tr:nth-child(even) {
     flex-direction: column;
     margin-left: 5em;
   }
+
+  .card{
+    width:auto;
+    height:auto;
+  }
 }
 
 @media (max-width: 768px){
   .gridContainer{
+    display: flex;
+    flex-direction: column;
+  }
+
+  .container:not(.optionsContainer > .container){
+    width: fit-content;
+  }
+
+  .container > .tabs{
+    width: fit-content;
+  }
+
+  .assignmentInfo{
+    margin-left: 3em;
+  }
+  .assignmentInfo > div * {
+    display: block;
+  }
+
+  input:not([type="radio"]){
+    width: 150px;
+  }
+
+  fieldset{
     display: flex;
     flex-direction: column;
   }
@@ -223,11 +264,6 @@ tr:nth-child(even) {
     flex-direction: column;
   }
 
-  .card{
-    width:auto;
-    height:auto;
-  }
-
   button{
     height:auto;
   }
@@ -235,12 +271,21 @@ tr:nth-child(even) {
 }
 
 .tabs{
-  width: 90%;
-  margin: 1em auto;
+  width: 80%;
+  margin: 1em auto 0 auto;
   display: flex;
   justify-content: space-between;
 }
 
 .tabs > button{
   width: 100%;
+  margin: 0;
+  border-radius: 8px 8px 0 0;
+  border-style: solid;
+  border-width: 1px 1px 0 1px;
+  border-color:rgb(147, 147, 147);
+}
+
+.tabs > button:hover{
+  border-color: #646cff;
 }
