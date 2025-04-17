@@ -19,11 +19,6 @@ function HomePage(props) {
 
   async function makeCourse() {
     setIsPopupVisible(true);
-    // let data = props.userData;
-    // //data.course_name = ;
-    // let response = await createNewClass(data);
-    // if(([1,2,3].includes(response))) {return;}
-    // setClassroom((prev) => [...prev, response.classroom]);
   }
   
   async function handleCourseCreation(courseName) {
