@@ -6,13 +6,14 @@ const apiURL = import.meta.env.VITE_SERVER_URL;
 function MakeAssignment(){
     const [questions, setQuestions] = useState([]);
     const formRefs = useRef([]);
+    const [buttonLabel, setButtonLabel] = useState("Create Assignment");
 
     const navigate = useNavigate();
     const location = useLocation();
 
     const handleSaveQuestion = async (data) => {
         data[0].name = document.getElementById('assName').value;
-        data[0].weight = parseInt(document.getElementById('weight').value);
+        data[0].weight = 1;
         data[0].posted_at = document.getElementById('rel').value + "T00:00:00";
         data[0].expiry_time = document.getElementById('due').value + "T00:00:00";
         data[0].classroom_id = location.state.id;
@@ -74,6 +75,14 @@ function MakeAssignment(){
         } else if (location.state.type === "question"){
             handleSaveQuestion(data);
         }
+        
+        // Change button label and style after successful submission.
+        setButtonLabel("Assignment Created");
+        
+        // Reset the button after 5 seconds.
+        setTimeout(() => {
+            setButtonLabel("Create Assignment");
+        }, 5000);
     };
 
     const handleRemove = (event) => {
@@ -102,8 +111,12 @@ function MakeAssignment(){
                         <input id="due" type="date"></input>
                     </div>
                     <div>
-                        <label>Weight:</label>
-                        <input id='weight' type="number"></input>
+                    {location.state.type === "quiz" && (
+                       <div>
+                         <label>Weight:</label>
+                         <input id="weight" type="number"/>
+                       </div>
+                    )}
                     </div>
                     <div>
                         <label>Assignment Name:</label>
@@ -120,14 +133,24 @@ function MakeAssignment(){
                                 </div>
                             ))}
                             <div style={{display: "flex", marginTop: "1em"}}>
-                                <button id="addQuestion" style={{marginRight: "auto"}} onClick={addQuestionForm}>+</button>
-                                <button onClick={handleSubmitAll}>Create Assignment</button>
+                                <button id="addQuestion" style={{marginRight: "auto"}} onClick={addQuestionForm}>Add Question +</button>
+                                <button 
+                                    onClick={handleSubmitAll}
+                                    style={{backgroundColor: buttonLabel === "Assignment Created" ? "#646cff" : undefined}}
+                                >
+                                    {buttonLabel}
+                                </button>
                             </div>
                         </div>
                     ) : (
                         <div className='container' style={{backgroundColor: '#5e5e5e'}}>
                             <QuestionForm ref={(el) => (formRefs.current[0] = el)}/>
-                            <button onClick={handleSubmitAll}>Create Assignment</button>
+                            <button 
+                                onClick={handleSubmitAll}
+                                style={{backgroundColor: buttonLabel === "Assignment Created" ? "#646cff" : undefined}}
+                            >
+                                {buttonLabel}
+                            </button>
                         </div>
                     )}
                 </div>
