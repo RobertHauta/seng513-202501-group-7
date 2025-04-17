@@ -22,6 +22,7 @@ function MakeAssignment(){
         console.log(data);
         const response = await createClassQuestion(data[0]);
         console.log(response);
+        return (typeof response === "object" && response !== null);
     }
 
     const createOptionsArray = (question) => {
@@ -56,10 +57,11 @@ function MakeAssignment(){
         })
         console.log(mes);
         const response = await createQuiz(mes);
-        console.log(response);
+        console.log(typeof response);
+        return(typeof response === "object" && response !== null);
     }   
 
-    const handleSubmitAll = () => {
+    const handleSubmitAll = async () => {
         let data = [];
         formRefs.current.forEach((formRef, i) => {
             if (formRef && typeof formRef.submitForm === 'function') {
@@ -70,19 +72,23 @@ function MakeAssignment(){
             }
         });
 
+        let success = false;
         if (location.state.type === "quiz") {
-            handleSaveQuiz(data);
+            success = await handleSaveQuiz(data);
         } else if (location.state.type === "question"){
-            handleSaveQuestion(data);
+            success = await handleSaveQuestion(data);
         }
-        
-        // Change button label and style after successful submission.
-        setButtonLabel("Assignment Created");
-        
-        // Reset the button after 5 seconds.
-        setTimeout(() => {
-            setButtonLabel("Create Assignment");
-        }, 5000);
+
+        if(success){
+            // Change button label and style after successful submission.
+            setButtonLabel("Assignment Created");
+            
+            // Reset the button after 5 seconds.
+            setTimeout(() => {
+                setButtonLabel("Create Assignment");
+                //navigate('/CoursePage', {state: {name: location.state.name, id: location.state.id, user: location.state.user}}); If wanting to go back to course after creation
+            }, 2000);
+        }
     };
 
     const handleRemove = (event) => {
@@ -143,8 +149,10 @@ function MakeAssignment(){
                             </div>
                         </div>
                     ) : (
-                        <div className='container' style={{backgroundColor: '#5e5e5e'}}>
-                            <QuestionForm ref={(el) => (formRefs.current[0] = el)}/>
+                        <div>
+                            <div className='container' style={{backgroundColor: '#5e5e5e'}}>
+                                <QuestionForm ref={(el) => (formRefs.current[0] = el)}/>
+                            </div>
                             <button 
                                 onClick={handleSubmitAll}
                                 style={{backgroundColor: buttonLabel === "Assignment Created" ? "#646cff" : undefined}}
@@ -281,6 +289,7 @@ async function createClassQuestion(data){
             if(response.ok){
                 return response.json();
             } else {
+                alert("Failed to create assignment. Please fill out all input fields.");
                 throw new Error('Failed to create assignment');
             }
         }).then(result => {
@@ -303,6 +312,7 @@ async function createQuiz(data){
             if(response.ok){
                 return response.json();
             } else {
+                alert("Failed to create assignment. Please fill out all input fields.");
                 throw new Error('Failed to create assignment');
             }
         }).then(result => {
