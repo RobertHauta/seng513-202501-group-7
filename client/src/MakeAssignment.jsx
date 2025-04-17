@@ -57,7 +57,7 @@ function MakeAssignment(){
         })
         console.log(mes);
         const response = await createQuiz(mes);
-        console.log(typeof response);
+        console.log(response);
         return(typeof response === "object" && response !== null);
     }   
 
