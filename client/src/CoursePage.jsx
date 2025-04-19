@@ -9,12 +9,12 @@ function CoursePage() {
   const [grades, setGrades] = useState([]);
   const [totalGrade, setTotalGrade] = useState(0);
 
-  const [isMobile, setIsMobile] = useState(window.matchMedia('(max-width: 768px)').matches);
+  const [isSmall, setIsSmall] = useState(window.matchMedia('(max-width: 1200px)').matches);
   const [activeTab, setActiveTab] = useState("quizzes");
 
   useEffect(() => { //Run on load
       const mediaQuery = window.matchMedia('(max-width: 1200px)');
-      const handleResize = () => setIsMobile(mediaQuery.matches);
+      const handleResize = () => setIsSmall(mediaQuery.matches);
       mediaQuery.addEventListener('change', handleResize);
 
       const fetchQuizzes = async () => {
@@ -56,7 +56,7 @@ function CoursePage() {
     }
   }
 
-  if(isMobile){
+  if(isSmall){
     return (
       <div>
         <h1>{location.state.name}</h1>
