@@ -184,7 +184,7 @@ const Grades = ({location, grades, totalGrade}) => {
 
 const ClassQuestions = ({location, navigate, questions}) => {
   return (
-    <div className='container' style={{backgroundColor: '#5e5e5e', marginTop: "0"}}>
+    <div className='container' style={{backgroundColor: '#5e5e5e', marginTop: "0", minWidth: "320px"}}>
       {location.state.user.role_name === "Professor" ? (
         <div style={{display: 'flex', alignItems: 'center'}}>
           <h2>Class Questions</h2>

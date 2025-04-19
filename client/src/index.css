@@ -102,7 +102,7 @@ input:not([type="radio"]):focus {
 }
 
 .card{
-  min-width: 250px;
+  min-width: 200px;
   width: 15%; 
   height: 15%;
   background-color: #5e5e5e;

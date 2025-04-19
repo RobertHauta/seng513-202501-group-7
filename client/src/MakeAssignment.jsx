@@ -138,14 +138,14 @@ function MakeAssignment(){
                                     <QuestionForm ref={(el) => (formRefs.current[index] = el)} />
                                 </div>
                             ))}
-                            <div style={{display: "flex", marginTop: "1em"}}>
-                                <button id="addQuestion" style={{marginRight: "auto"}} onClick={addQuestionForm}>Add Question +</button>
-                                <button 
+                            <div style={{display: "flex", marginTop: "1em"}}> 
+                                <button
                                     onClick={handleSubmitAll}
-                                    style={{backgroundColor: buttonLabel === "Assignment Created" ? "#646cff" : undefined}}
+                                    style={{marginRight: "auto", backgroundColor: buttonLabel === "Assignment Created" ? "#646cff" : undefined}}
                                 >
                                     {buttonLabel}
                                 </button>
+                                <button id="addQuestion"  onClick={addQuestionForm}>Add Question +</button>
                             </div>
                         </div>
                     ) : (
