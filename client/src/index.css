@@ -84,14 +84,14 @@ input, fieldset{
 
 input:not([type="radio"]) {
   padding: 10px;
-  border: 2px solid #939393; /* Green border */
+  border: 2px solid #939393;
   border-radius: 5px;
   outline: none;
   font-size: 16px;
   transition: all 0.3s ease-in-out;
 }
 input:not([type="radio"]):focus {
-  border-color: #646cff; /* Darker green */
+  border-color: #646cff;
   box-shadow: 0px 0px 8px rgba(52, 46, 139, 0.5);
 }
 
