@@ -3,7 +3,7 @@
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
+  color-scheme: dark;
   color: rgba(255, 255, 255, 0.87);
   background-color: #242424;
 
@@ -54,19 +54,6 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
-}
-
 .container{
   width: 80%;
   padding: 20px;
@@ -95,27 +82,27 @@ input, fieldset{
   margin: 10px 1em 10px 1em;
 }
 
-input {
-  width: 300px;
+input:not([type="radio"]) {
   padding: 10px;
-  border: 2px solid #939393; /* Green border */
+  border: 2px solid #939393;
   border-radius: 5px;
   outline: none;
   font-size: 16px;
   transition: all 0.3s ease-in-out;
 }
-input:focus {
-  border-color: #646cff; /* Darker green */
+input:not([type="radio"]):focus {
+  border-color: #646cff;
   box-shadow: 0px 0px 8px rgba(52, 46, 139, 0.5);
 }
 
 .classes{
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   flex-wrap: wrap;
 }
 
 .card{
+  min-width: 200px;
   width: 15%; 
   height: 15%;
   background-color: #5e5e5e;
@@ -150,6 +137,10 @@ input:focus {
 }
 
 .popup-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
   background-color: rgb(85, 85, 85);
   padding: 20px;
   border-radius: 5px;
@@ -200,31 +191,54 @@ tr:nth-child(even) {
   display: flex;
   justify-content: space-around;
   margin-top: 1em;
+  margin-left: 4em;
 }
 
-@media (max-width: 768px){
-  .gridContainer{
-    display: flex;
-    flex-direction: column;
-  }
+.quizTableEdit{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
+@media (max-width: 1200px){
   .assignmentInfo{
     flex-direction: column;
-    margin-left: 1em;
-  }
-
-  h1{
-    text-align: center;
-  }
-
-  .classes{
-    display: flex;
-    flex-direction: column;
+    margin-left: 5em;
   }
 
   .card{
     width:auto;
     height:auto;
+  }
+}
+
+@media (max-width: 768px){
+  .gridContainer, .classes, fieldset{
+    display: flex;
+    flex-direction: column;
+  }
+
+  .container:not(.optionsContainer > .container){
+    width: fit-content;
+  }
+
+  .container > .tabs{
+    width: fit-content;
+  }
+
+  .assignmentInfo{
+    margin-left: 3em;
+  }
+  .assignmentInfo > div * {
+    display: block;
+  }
+
+  input:not([type="radio"]){
+    width: 150px;
+  }
+
+  h1{
+    text-align: center;
   }
 
   button{
@@ -234,12 +248,21 @@ tr:nth-child(even) {
 }
 
 .tabs{
-  width: 90%;
-  margin: 1em auto;
+  width: 80%;
+  margin: 1em auto 0 auto;
   display: flex;
   justify-content: space-between;
 }
 
 .tabs > button{
   width: 100%;
+  margin: 0;
+  border-radius: 8px 8px 0 0;
+  border-style: solid;
+  border-width: 1px 1px 0 1px;
+  border-color:rgb(147, 147, 147);
+}
+
+.tabs > button:hover{
+  border-color: #646cff;
 }

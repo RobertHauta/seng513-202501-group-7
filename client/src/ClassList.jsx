@@ -121,7 +121,7 @@ function ClassList(){
                                 <tr key={student.id}>
                                     <td>{student.name}</td>
                                     <td>
-                                        <div style={{display: "flex", justifyContent: "space-between", alignItems: "center"}}>
+                                        <div className="quizTableEdit">
                                             {student.score}
                                             {location.state.quizObject ? (
                                                 student.score !== "Not Submitted" ? (<button onClick={() => makeVisible(parseFloat(student.score.substring(0, student.score.length-1)), index)}>Edit Grade</button>) : (null)

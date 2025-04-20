@@ -9,12 +9,12 @@ function CoursePage() {
   const [grades, setGrades] = useState([]);
   const [totalGrade, setTotalGrade] = useState(0);
 
-  const [isMobile, setIsMobile] = useState(window.matchMedia('(max-width: 768px)').matches);
+  const [isSmall, setIsSmall] = useState(window.matchMedia('(max-width: 1200px)').matches);
   const [activeTab, setActiveTab] = useState("quizzes");
 
   useEffect(() => { //Run on load
-      const mediaQuery = window.matchMedia('(max-width: 768px)');
-      const handleResize = () => setIsMobile(mediaQuery.matches);
+      const mediaQuery = window.matchMedia('(max-width: 1200px)');
+      const handleResize = () => setIsSmall(mediaQuery.matches);
       mediaQuery.addEventListener('change', handleResize);
 
       const fetchQuizzes = async () => {
@@ -56,7 +56,7 @@ function CoursePage() {
     }
   }
 
-  if(isMobile){
+  if(isSmall){
     return (
       <div>
         <h1>{location.state.name}</h1>
@@ -104,7 +104,7 @@ export default CoursePage;
 
 const Quizzes = ({location, navigate, quizzes}) => {
   return (
-    <div className='container' style={{gridRow: 'span 2', backgroundColor: '#5e5e5e'}}>
+    <div className='container' style={{gridRow: 'span 2', backgroundColor: '#5e5e5e', marginTop: "0"}}>
       {location.state.user.role_name === "Professor" ? (
         <div style={{display: 'flex', alignItems: 'center'}}>
           <h2>Quizzes</h2>
@@ -121,7 +121,7 @@ const Quizzes = ({location, navigate, quizzes}) => {
             ) : (
               <h3 className="container" style={{marginRight: '1em', backgroundColor: "#939393", cursor: "pointer"}} onClick={() => navigate('/ClassList', {state: {quizObject: quiz, name: location.state.name, id: location.state.id, user: location.state.user, headers: ['Student Name','Achieved Grade', null]}})}>{quiz.title}</h3>
             )}
-            <p className="container" style={{backgroundColor: '#1a1a1a'}}>Due: {quiz.due_date.substring(0, 10)}</p>
+            <p className="container" style={{marginRight: '1em', backgroundColor: '#1a1a1a'}}>Due: {quiz.due_date.substring(0, 10)}</p>
           </div>
           ))
         }
@@ -132,12 +132,12 @@ const Quizzes = ({location, navigate, quizzes}) => {
 
 const Grades = ({location, grades, totalGrade}) => {
   return (
-    <div className='container' style={{backgroundColor: '#5e5e5e'}}>
+    <div className='container' style={{backgroundColor: '#5e5e5e', marginTop: "0"}}>
       <div className='card' style={{backgroundColor: '#1a1a1a', width: 'fit-content', height: 'fit-content', border: 0}}>
         {location.state.user.role_name === "Student" ? (
-          <p style={{margin: '0'}}>Total Grade: {totalGrade}</p>
+          <p style={{margin: '0', width: 'fit-content'}}>Total Grade: {totalGrade}</p>
         ) : (
-          <p style={{margin: '0'}}>Average Course Grade: {totalGrade}</p>
+          <p style={{margin: '0', width: 'fit-content'}}>Average Course Grade: {totalGrade}</p>
         )}
       </div>
       <h2>Grades</h2>
@@ -184,7 +184,7 @@ const Grades = ({location, grades, totalGrade}) => {
 
 const ClassQuestions = ({location, navigate, questions}) => {
   return (
-    <div className='container' style={{backgroundColor: '#5e5e5e'}}>
+    <div className='container' style={{backgroundColor: '#5e5e5e', marginTop: "0", minWidth: "320px"}}>
       {location.state.user.role_name === "Professor" ? (
         <div style={{display: 'flex', alignItems: 'center'}}>
           <h2>Class Questions</h2>

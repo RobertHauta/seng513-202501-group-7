@@ -6,13 +6,14 @@ const apiURL = import.meta.env.VITE_SERVER_URL;
 function MakeAssignment(){
     const [questions, setQuestions] = useState([]);
     const formRefs = useRef([]);
+    const [buttonLabel, setButtonLabel] = useState("Create Assignment");
 
     const navigate = useNavigate();
     const location = useLocation();
 
     const handleSaveQuestion = async (data) => {
         data[0].name = document.getElementById('assName').value;
-        data[0].weight = parseInt(document.getElementById('weight').value);
+        data[0].weight = 1;
         data[0].posted_at = document.getElementById('rel').value + "T00:00:00";
         data[0].expiry_time = document.getElementById('due').value + "T00:00:00";
         data[0].classroom_id = location.state.id;
@@ -21,6 +22,7 @@ function MakeAssignment(){
         console.log(data);
         const response = await createClassQuestion(data[0]);
         console.log(response);
+        return (typeof response === "object" && response !== null);
     }
 
     const createOptionsArray = (question) => {
@@ -56,9 +58,10 @@ function MakeAssignment(){
         console.log(mes);
         const response = await createQuiz(mes);
         console.log(response);
+        return(typeof response === "object" && response !== null);
     }   
 
-    const handleSubmitAll = () => {
+    const handleSubmitAll = async () => {
         let data = [];
         formRefs.current.forEach((formRef, i) => {
             if (formRef && typeof formRef.submitForm === 'function') {
@@ -69,10 +72,22 @@ function MakeAssignment(){
             }
         });
 
+        let success = false;
         if (location.state.type === "quiz") {
-            handleSaveQuiz(data);
+            success = await handleSaveQuiz(data);
         } else if (location.state.type === "question"){
-            handleSaveQuestion(data);
+            success = await handleSaveQuestion(data);
+        }
+
+        if(success){
+            // Change button label and style after successful submission.
+            setButtonLabel("Assignment Created");
+            
+            // Reset the button after 5 seconds.
+            setTimeout(() => {
+                setButtonLabel("Create Assignment");
+                //navigate('/CoursePage', {state: {name: location.state.name, id: location.state.id, user: location.state.user}}); If wanting to go back to course after creation
+            }, 2000);
         }
     };
 
@@ -102,11 +117,15 @@ function MakeAssignment(){
                         <input id="due" type="date"></input>
                     </div>
                     <div>
-                        <label>Weight:</label>
-                        <input id='weight' type="number"></input>
+                    {location.state.type === "quiz" && (
+                       <div>
+                         <label>Weight:</label>
+                         <input id="weight" type="number"/>
+                       </div>
+                    )}
                     </div>
                     <div>
-                        <label>Assignment Name</label>
+                        <label>Assignment Name:</label>
                         <input id='assName' type="text"></input>
                     </div>
                 </div>
@@ -115,19 +134,31 @@ function MakeAssignment(){
                         <div>
                             {questions.map((_, index) => (
                                 <div key={index} className='container' style={{backgroundColor: '#5e5e5e'}}>
-                                    <button onClick={handleRemove}>Delete</button>
+                                    <button style={{marginBottom: "1em"}} onClick={handleRemove}>Delete</button>
                                     <QuestionForm ref={(el) => (formRefs.current[index] = el)} />
                                 </div>
                             ))}
-                            <div style={{display: "flex", marginTop: "1em"}}>
-                                <button id="addQuestion" style={{marginRight: "auto"}} onClick={addQuestionForm}>+</button>
-                                <button onClick={handleSubmitAll}>Create Assignment</button>
+                            <div style={{display: "flex", marginTop: "1em"}}> 
+                                <button
+                                    onClick={handleSubmitAll}
+                                    style={{marginRight: "auto", backgroundColor: buttonLabel === "Assignment Created" ? "#646cff" : undefined}}
+                                >
+                                    {buttonLabel}
+                                </button>
+                                <button id="addQuestion"  onClick={addQuestionForm}>Add Question +</button>
                             </div>
                         </div>
                     ) : (
-                        <div className='container' style={{backgroundColor: '#5e5e5e'}}>
-                            <QuestionForm ref={(el) => (formRefs.current[0] = el)}/>
-                            <button onClick={handleSubmitAll}>Create Assignment</button>
+                        <div>
+                            <div className='container' style={{backgroundColor: '#5e5e5e'}}>
+                                <QuestionForm ref={(el) => (formRefs.current[0] = el)}/>
+                            </div>
+                            <button 
+                                onClick={handleSubmitAll}
+                                style={{backgroundColor: buttonLabel === "Assignment Created" ? "#646cff" : undefined}}
+                            >
+                                {buttonLabel}
+                            </button>
                         </div>
                     )}
                 </div>
@@ -258,6 +289,7 @@ async function createClassQuestion(data){
             if(response.ok){
                 return response.json();
             } else {
+                alert("Failed to create assignment. Please fill out all input fields.");
                 throw new Error('Failed to create assignment');
             }
         }).then(result => {
@@ -280,6 +312,7 @@ async function createQuiz(data){
             if(response.ok){
                 return response.json();
             } else {
+                alert("Failed to create assignment. Please fill out all input fields.");
                 throw new Error('Failed to create assignment');
             }
         }).then(result => {

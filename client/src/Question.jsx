@@ -60,7 +60,7 @@ function Question(props){
                                 props.isGrading === true ? (
                                     <div className={option.is_correct ? "container correctOption" : "container"} style={{cursor: "auto"}} key={index}>
                                         {index === studentAnswer ? (
-                                            <p>{option.option_text} - STUDENT ANSWER</p>
+                                            <p>{option.option_text}<b>- STUDENT ANSWER</b></p>
                                         ) : (
                                             <p>{option.option_text}</p>
                                         )}
@@ -90,14 +90,14 @@ function Question(props){
                                 <div className='optionsContainer'>
                                     <div className={props.objectData.correct_answer === "True" ? "container correctOption" : "container"} style={{cursor: "auto"}}>
                                         {studentAnswer === "True" ? (
-                                            <p>True - STUDENT ANSWER</p>
+                                            <p>True <b>- STUDENT ANSWER</b></p>
                                         ) : (
                                             <p>True</p>
                                         )}
                                     </div>
                                     <div className={props.objectData.correct_answer === "False" ? "container correctOption" : "container"} style={{cursor: "auto"}}>
                                         {studentAnswer === "False" ? (
-                                            <p>False - STUDENT ANSWER</p>
+                                            <p>False <b>- STUDENT ANSWER</b></p>
                                         ) : (
                                             <p>False</p>
                                         )}
