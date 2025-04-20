@@ -213,7 +213,7 @@ tr:nth-child(even) {
 }
 
 @media (max-width: 768px){
-  .gridContainer{
+  .gridContainer, .classes, fieldset{
     display: flex;
     flex-direction: column;
   }
@@ -237,18 +237,8 @@ tr:nth-child(even) {
     width: 150px;
   }
 
-  fieldset{
-    display: flex;
-    flex-direction: column;
-  }
-
   h1{
     text-align: center;
-  }
-
-  .classes{
-    display: flex;
-    flex-direction: column;
   }
 
   button{
