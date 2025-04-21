@@ -11,7 +11,6 @@ function HomePage(props) {
   useEffect(() => { //Run on load
     const fetchClasses = async () => {
       let response = props.userData.role_name === "Professor" ? await getProfessorClasses(props.userData.user_id) : await getStudentClasses(props.userData.user_id);
-      console.log(response);
       setClassroom(() => [...response.classrooms]);
     }
     fetchClasses();

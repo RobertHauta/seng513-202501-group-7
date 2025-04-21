@@ -73,7 +73,6 @@ function Question(props){
                                                 props.onOptionSelect && props.onOptionSelect(option);
                                             }
                                             else{
-                                                console.log(props.questionIndex);
                                                 props.onOptionSelect && props.onOptionSelect(option, props.questionIndex);
                                             }
                                         }}>
@@ -111,7 +110,6 @@ function Question(props){
                                                         props.onOptionSelect && props.onOptionSelect("True");
                                                     }
                                                     else{
-                                                        console.log(props.questionIndex);
                                                         props.onOptionSelect && props.onOptionSelect("True", props.questionIndex);
                                                     }
                                                 }}>
@@ -123,7 +121,6 @@ function Question(props){
                                                         props.onOptionSelect && props.onOptionSelect("False");
                                                     }
                                                     else{
-                                                        console.log(props.questionIndex);
                                                         props.onOptionSelect && props.onOptionSelect("False", props.questionIndex);
                                                     }
                                                 }}>

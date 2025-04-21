@@ -19,9 +19,7 @@ function MakeAssignment(){
         data[0].classroom_id = location.state.id;
         data[0].userId = location.state.user.user_id;
         data[0].role_id = convertRoleToId(location.state.user.role_name);
-        console.log(data);
         const response = await createClassQuestion(data[0]);
-        console.log(response);
         return (typeof response === "object" && response !== null);
     }
 
@@ -55,9 +53,7 @@ function MakeAssignment(){
                options: createOptionsArray(question) 
             });
         })
-        console.log(mes);
         const response = await createQuiz(mes);
-        console.log(response);
         return(typeof response === "object" && response !== null);
     }   
 
@@ -66,7 +62,6 @@ function MakeAssignment(){
         formRefs.current.forEach((formRef, i) => {
             if (formRef && typeof formRef.submitForm === 'function') {
                 data.push(formRef.submitForm());
-                console.log(`Question ${i + 1}:`, data);
             } else {
                 console.warn(`Form ref ${i} is missing or invalid`);
             }

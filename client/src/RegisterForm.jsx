@@ -20,7 +20,6 @@ function RegisterForm() {
     }
     let response = await createUser(enteredName, enteredEmail, enteredPassword, enteredRole);
     if(response === 0){
-      console.log("Register Successfull");
       navigate('/');
     }
     else if(response === 1){

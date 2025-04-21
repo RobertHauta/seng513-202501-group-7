@@ -11,10 +11,8 @@ function QuizPage(){
     const location = useLocation();
 
     useEffect(() => { //Run on load
-        console.log('Quiz Page loaded');
         const fetchQuestions = async () => {
             let response = await getQuestions(location.state.quizObject.id);
-            console.log(response);
             
             setQuestions(() => [...response.questions]);
           }
@@ -24,7 +22,6 @@ function QuizPage(){
       }, []);
 
     async function handleSubmit(){
-        console.log(optionsSelected);
         if(optionsSelected.includes(null)){ return alert('Please select an answer for all questions.'); }
         if(optionsSelected.includes(undefined)){ return alert('Please select an answer for all questions.'); }
         if(optionsSelected.length !== questions.length){ return alert('Please select an answer for all questions.'); }
@@ -42,9 +39,7 @@ function QuizPage(){
                         data.answers.push({question_id: questions[i].id, option_text: optionsSelected[i].option_text, id: optionsSelected[i].id, isMC: true});
                     }
                 }
-                console.log(data);
                 const response = await submitQuizApi(data);
-                console.log(response);
             } catch (error) {
                 console.error('Error:', error);
             }
@@ -72,8 +67,6 @@ function QuizPage(){
                             onOptionSelect={(option, ind) => {
                                 setOptionsSelected((prev) => {
                                     const newOptions = [...prev];
-                                    console.log(newOptions);
-                                    console.log(ind);
                                     newOptions[ind] = option;
                                     return newOptions;
                                 });
