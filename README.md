@@ -33,3 +33,17 @@ docker-compose -f ./docker-compose-prod.yml up --build
 Then Access localhost:3000
 
 ### Note: Make Sure to have docker desktop open
+
+# Some Login Information
+
+### Professor
+Email:      robert@gmail.com
+Password:   Robbie123
+
+### TA
+Email:      
+Password:
+
+### Student
+Email:      teststudent@example.com
+Password:   studentpass
