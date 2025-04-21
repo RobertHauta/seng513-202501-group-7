@@ -31,10 +31,6 @@ app.use((err, req, res, next) => {
     res.status(500).send('Something broke!');
 });
 
-app.get('/api', (req, res) => {
-    res.json({ "users": [{ "id": 1, "name": "John Doe" }, { "id": 2, "name": "Jane Doe" }] });
-});
-
 app.post('/api/login', (request, response) => {
     queries.users.getUserByNamePass(request, response);
 });
@@ -206,5 +202,4 @@ app.post('/api/quiz/submit', (req, res) => {
 
 app.listen(5100, () => {
     console.log('Server listening at http://localhost:5100');
-
 });

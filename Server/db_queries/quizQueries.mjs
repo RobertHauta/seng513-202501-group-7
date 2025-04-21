@@ -93,7 +93,6 @@ const getQuizzes = async (req, res) => {
         WHERE classroom_id = $1
       `;
       const { rows } = await client.query(query, [classroomId]);
-      console.log(rows);
       return res.json({ quizzes: rows });
     } catch (error) {
       console.error('Error fetching quizzes:', error);
@@ -326,8 +325,6 @@ const getStudentAnswers = async (req, res) => {
       WHERE sa.student_id = $1 AND sa.question_id = $2
     `;
     const { rows } = await client.query(query, [studentId, questionId]);
-
-    console.log('Student answers:', rows);
 
     return res.status(200).json({ answers: rows });
   } catch (error) {

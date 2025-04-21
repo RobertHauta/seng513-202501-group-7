@@ -19,7 +19,6 @@ const postgresPool = new Pool({
 });
 
 const buildMultipleChoicesQuery = async (request, response) => {
-  console.log(request.body);
   const {
     userId,
     role_id,
@@ -142,7 +141,6 @@ const buildMultipleChoicesQuery = async (request, response) => {
 }
 
 const buildTrueFalseQuestionQuery = async (request, response) => {
-  console.log(request.body);
   const {
     userId,
     role_id,
@@ -359,8 +357,6 @@ const validateCorrectAnswer = async (req, res) => {
       `;
 
     const text = ['True', 'False'].includes(selected) ? selected : selected.option_text;
-    console.log(text);
-
     const { rows } = await client.query(insertQuery, [
       studentId,
       questionId,
@@ -396,8 +392,6 @@ const getStudentAnswer = async (req, res) => {
       WHERE sa.student_id = $1 AND sa.class_question_id = $2
     `;
     const { rows } = await client.query(query, [studentId, questionId]);
-
-    console.log('Student answers:', rows);
 
     return res.status(200).json({ answers: rows });
   } catch (error) {

@@ -123,8 +123,6 @@ const deleteUserByEmail = async (request, response) => {
 // Function to retrieve classrooms for a given user ID (from query parameters)
 const getUserClassrooms = async (request, response) => {
     const userId = request.params.userId; 
-    console.log(request.params);
-    console.log(`Getting classrooms for user ID: ${userId}`);
     if (!userId) {
       response.status(400).json({ error: 'User ID is required' });
       return;
@@ -140,7 +138,6 @@ const getUserClassrooms = async (request, response) => {
         WHERE cm.user_id = $1
       `;
       const { rows } = await client.query(query, [userId]);
-      console.log('Retrieved classrooms:', rows);
       response.json({ classrooms: rows });
     } catch (error) {
       console.error('Error fetching classrooms:', error);
@@ -153,8 +150,6 @@ const getUserClassrooms = async (request, response) => {
 // Function to retrieve classrooms for a given user ID (from query parameters)
 const getProfessorClassrooms = async (request, response) => {
     const userId = request.params.userId; 
-    console.log(request.params);
-    console.log(`Getting classrooms for user ID: ${userId}`);
     if (!userId) {
       response.status(400).json({ error: 'User ID is required' });
       return;
@@ -169,7 +164,6 @@ const getProfessorClassrooms = async (request, response) => {
         WHERE professor_id = $1
       `;
       const { rows } = await client.query(query, [userId]);
-      console.log('Retrieved classrooms:', rows);
       response.json({ classrooms: rows });
     } catch (error) {
       console.error('Error fetching classrooms:', error);

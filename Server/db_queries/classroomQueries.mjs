@@ -21,7 +21,6 @@ const postgresPool = new Pool({
 // Function to create a new Classroom
 const createClassroom = async (request, response) => {
     const { userId, name, role_id } = request.body;
-    console.log('Creating classroom:', { userId, name, role_id });
     if (!userId) {
       response.status(400).json({ error: 'User ID is required' });
       return;
@@ -105,7 +104,6 @@ const addStudentToClass = async (request, response) => {
           users u ON u.id = c.professor_id
       `;
       const { rows } = await client.query(query, [userId, classroom_id, role_id]);
-      console.log(rows);
       response.json({ membership: rows[0] });
     } catch (error) {
       console.error('Error inserting classroom membership:', error);
@@ -134,7 +132,6 @@ const getClassQuestGrades = async (request, response) => {
         cm.classroom_id = $1 AND cm.role_id = 3
     `;
     const { rows } = await client.query(query, [classroomId, id]);
-    console.log(rows);
     rows.forEach(row => {
       if(row.is_correct === null || row.is_correct === undefined || isNaN(row.is_correct)){
         row.score = "Not Submitted";
@@ -193,7 +190,6 @@ const getQuizGrades = async (request, response) => {
 
 const getAllStudentsInClassroom = async (request, response) => {
   const { classroomId } = request.params;
-  console.log('Getting students in classroom:', classroomId);
   if (!classroomId) {
     response.status(400).json({ error: 'Classroom id is required' });
     return;
@@ -242,7 +238,6 @@ const getAllStudentsInClassroom = async (request, response) => {
 
 const getClassroomGrades = async (request, response) => {
   const { classroomId, pageType, id } = request.params;
-  console.log('Getting students in classroom:', classroomId);
   if (!classroomId) {
     response.status(400).json({ error: 'Classroom id is required' });
     return;

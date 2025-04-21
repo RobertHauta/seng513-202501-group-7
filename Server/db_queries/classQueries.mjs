@@ -18,10 +18,6 @@ const postgresPool = new Pool({
     connectionString: process.env.DATABASE_URL
 });
 
-const fetchClassrooms = async (request, response) => {
-    
-}
-
 // Function to create a new Classroom
 const createClassroom = async (request, response) => {
     const { user_id, name, role_id } = request.body;
