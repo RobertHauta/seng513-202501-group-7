@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const apiURL = import.meta.env.VITE_SERVER_URL;
-console.log('API URL:', apiURL);
 
 function LoginForm(props) {
   const navigate = useNavigate();
@@ -74,7 +73,7 @@ async function getUser(email, password) {
         alert("Invalid email or password. Please try again.");
         reject(2);
       }
-      console.log('Login successful');
+
       return response.json();
     })
     .then(data => {

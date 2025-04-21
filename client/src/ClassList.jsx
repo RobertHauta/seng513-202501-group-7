@@ -17,19 +17,16 @@ function ClassList(){
         
           if(location.state.quizObject !== undefined && location.state.classQuestion === undefined) {
             let response = await getGradesList(location.state.id, 1, location.state.quizObject.id);
-            console.log(response);
             if(([1,2,3].includes(response))){ return; }
             setClassList(response.students);
 
           } else if(location.state.quizObject === undefined && location.state.classQuestion!== undefined) {
             let response = await getGradesList(location.state.id, 2, location.state.classQuestion.id);
-            console.log(response);
             if(([1,2,3].includes(response))){ return; }
             setClassList(response.students);
 
           } else if(location.state.quizObject === undefined && location.state.classQuestion === undefined) {
             let response = await getClassList(location.state.id);
-            console.log(response);
             if(([1,2,3].includes(response))){ return; }
 
             const sortedList = [...response.students].sort((a, b) => a.role_id - b.role_id);
@@ -52,7 +49,6 @@ function ClassList(){
             const assignmentId = location.state.quizObject ? location.state.quizObject.id : location.state.classQuestion.id;
             const studentId = classList[currentStudentIndex].id;
             let response = await updateGrade(assignmentId, pageType, studentId, parseFloat(grade)/100);
-            console.log(response);
             if(([1,2,3].includes(response))){ return; }
             const newClassList = classList.map((student, index) => {
                 if (index === currentStudentIndex) {

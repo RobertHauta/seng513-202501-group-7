@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const apiURL = import.meta.env.VITE_SERVER_URL;
@@ -20,7 +20,6 @@ function RegisterForm() {
     }
     let response = await createUser(enteredName, enteredEmail, enteredPassword, enteredRole);
     if(response === 0){
-      console.log("Register Successfull");
       navigate('/');
     }
     else if(response === 1){

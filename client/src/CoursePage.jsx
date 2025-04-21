@@ -30,7 +30,6 @@ function CoursePage() {
       const fetchGrades = async () => {
         let response_grades = location.state.user.role_name === "Student" ? await getGradeStudents(location.state.id, location.state.user.user_id) : await getGrade(location.state.id);
         if([1,2,3].includes(response_grades)) return;
-        console.log(response_grades);
         setGrades(() => [...response_grades.grades]);
         setTotalGrade(response_grades.finalGrade);
       }
