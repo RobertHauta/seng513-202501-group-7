@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Question from './Question';
 
 const apiURL = import.meta.env.VITE_SERVER_URL;
 
 function QuestionPage(){
-    const [classQuestion, setClassQuestion] = useState();
     const [optionSelected, setOptionSelected] = useState(null);
 
     const navigate = useNavigate();
