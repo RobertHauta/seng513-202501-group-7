@@ -41,8 +41,8 @@ Email:      robert@gmail.com
 Password:   Robbie123
 
 ### TA
-Email:      
-Password:
+Email:      userta@gmail.com    
+Password:   tapass
 
 ### Student
 Email:      teststudent@example.com
